@@ -1,0 +1,1 @@
+// TODO (Pessoa 2): validação de intenção — INTENCAO_INVALIDA, INTENCAO_EXPIRADA, INTENCAO_JA_PAGA

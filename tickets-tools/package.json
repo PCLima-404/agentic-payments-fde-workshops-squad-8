@@ -1,0 +1,21 @@
+{
+  "name": "tickets-tools",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "ts-node-dev src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.4",
+    "ts-node-dev": "^2.0.0",
+    "vitest": "^2.0.0",
+    "@types/node": "^20.14.0"
+  }
+}
