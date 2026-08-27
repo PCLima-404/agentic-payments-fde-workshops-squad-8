@@ -6,9 +6,9 @@ Chatbot que conversa com um LLM (Gemini) e executa a compra de ingressos para ev
 
 | Pasta | Responsável | Descrição |
 |---|---|---|
-| `auth/` | Pessoa 1 | API de autenticação (login/JWT) |
-| `tickets-tools/` | Pessoa 2 | Servidor MCP com as 3 tools (catálogo, intenção, compra) |
-| `gemini-chat/` | Pessoa 3 | Frontend + agente (Gemini API + MCP client) |
+| `auth/` | API de autenticação (login/JWT) |
+| `tickets-tools/` | Servidor MCP com as 3 tools (catálogo, intenção, compra) |
+| `gemini-chat/`  | Frontend + agente (Gemini API + MCP client) |
 
 ## Modelo utilizado
 - **LLM:** Gemini (definir versão exata aqui, ex: `gemini-2.5-flash`)
