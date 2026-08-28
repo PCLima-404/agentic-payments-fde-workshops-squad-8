@@ -9,6 +9,10 @@ import {
 } from "../src/validators/intencao.validator";
 import { Intencao } from "../src/types";
 import { realizarCompra } from "../src/tools/realizarCompra";
+import {
+  salvarIntencao,
+  buscarIntencaoPorId,
+} from "../src/data/intencoes";
 
 describe("validarPosse", () => {
   const intencaoDoPedro: Intencao = {
@@ -164,5 +168,44 @@ describe("Validação de intenção inexistente", () => {
       mensagem:
         "Essa intenção de compra não existe ou não pertence a este usuário.",
     });
+  });
+});
+
+describe("Integração da compra com limite e intenção", () => {
+  it("deve debitar o limite e marcar a intenção como paga", async () => {
+    const intencao: Intencao = {
+      intencaoId: `int_teste_${Date.now()}`,
+      eventoId: "evt_001",
+      quantidade: 1,
+      valorTotal: 120,
+      moeda: "BRL",
+      status: "pendente",
+      usuarioId: "usr_001",
+      expiraEm: new Date(Date.now() + 60_000).toISOString(),
+    };
+
+    salvarIntencao(intencao);
+
+    const resultado = await realizarCompra({
+      intencao_id: intencao.intencaoId,
+      metodo_pagamento: "pix",
+      usuario_id: "usr_001",
+      token: process.env.TOKEN_TESTE!,
+    });
+
+    expect(resultado).toMatchObject({
+      status: "aprovado",
+      intencao_id: intencao.intencaoId,
+      valor: 120,
+      metodo_pagamento: "pix",
+    });
+
+    if (resultado.status === "aprovado") {
+      expect(resultado.limite_restante).toBeLessThan(500);
+    }
+
+    const intencaoAtualizada = buscarIntencaoPorId(intencao.intencaoId);
+
+    expect(intencaoAtualizada?.status).toBe("paga");
   });
 });
