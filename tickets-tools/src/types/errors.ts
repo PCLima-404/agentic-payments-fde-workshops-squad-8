@@ -1,10 +1,11 @@
-// Códigos de erro possíveis ao recusar uma compra
+// Códigos de erro possíveis ao recusar uma operação de tool
 export type CodigoErro =
   | "INTENCAO_INVALIDA"
   | "INTENCAO_JA_PAGA"
   | "INTENCAO_EXPIRADA"
   | "LIMITE_EXCEDIDO"
   | "METODO_INVALIDO"
+  | "VAGAS_INSUFICIENTES"
   | "ERRO_INTERNO";
 
 // Formato único que TODA tool deve retornar quando falha
@@ -24,6 +25,8 @@ export const MENSAGENS_ERRO: Record<CodigoErro, string> = {
   LIMITE_EXCEDIDO:
     "O valor da compra excede o limite de gasto disponível para este usuário.",
   METODO_INVALIDO: "Método de pagamento inválido. Use 'cartao' ou 'pix'.",
+  VAGAS_INSUFICIENTES:
+    "Não há vagas suficientes disponíveis para este evento na quantidade solicitada.",
   ERRO_INTERNO: "Ocorreu um erro inesperado ao processar a solicitação.",
 };
 
