@@ -1,7 +1,9 @@
+// src/data/intencoes.ts
 import { db } from "../db/database";
 import { Intencao } from "../types";
+import { incrementarVagas } from "./eventos";
 
-// Tipagem intermediaria para mapear o retorno das colunas renomeadas no SELECT SQL
+// Tipagem intermediária para mapear o retorno das colunas renomeadas no SELECT SQL
 type IntencaoRow = {
   intencaoId: string;
   eventoId: string;
@@ -53,37 +55,96 @@ export function salvarIntencao(intencao: Intencao): void {
   stmt.run(intencao);
 }
 
-// Busca uma intenção pelo ID e garante a atualização de status caso a intenção tenha expirado
+// Busca uma intenção pelo ID e garante a atualização de status e o estorno de vagas
+// caso a intenção tenha expirado de forma atômica (db.transaction)
 export function buscarIntencaoPorId(
   intencaoId: string
 ): Intencao | undefined {
-  const expirada = db.prepare(`
-    UPDATE intencoes
-    SET status = 'expirada'
-    WHERE intencao_id = ?
-      AND status = 'pendente'
-      AND expira_em <= ?
-  `);
+  const agora = new Date().toISOString();
 
-  expirada.run(intencaoId, new Date().toISOString());
+  const processarConsultaEExpiracao = db.transaction(() => {
+    const stmt = db.prepare(`
+      SELECT
+        intencao_id AS intencaoId,
+        evento_id AS eventoId,
+        quantidade,
+        valor_total AS valorTotal,
+        moeda,
+        status,
+        usuario_id AS usuarioId,
+        expira_em AS expiraEm
+      FROM intencoes
+      WHERE intencao_id = ?
+    `);
 
-  const stmt = db.prepare(`
-    SELECT
-      intencao_id AS intencaoId,
-      evento_id AS eventoId,
-      quantidade,
-      valor_total AS valorTotal,
-      moeda,
-      status,
-      usuario_id AS usuarioId,
-      expira_em AS expiraEm
-    FROM intencoes
-    WHERE intencao_id = ?
-  `);
+    const row = stmt.get(intencaoId) as IntencaoRow | undefined;
+    if (!row) return undefined;
 
-  const row = stmt.get(intencaoId) as IntencaoRow | undefined;
+    // Se estiver pendente e já tiver ultrapassado o prazo de expiração
+    if (row.status === "pendente" && row.expiraEm <= agora) {
+      const updateStmt = db.prepare(`
+        UPDATE intencoes
+        SET status = 'expirada'
+        WHERE intencao_id = ? AND status = 'pendente'
+      `);
 
-  return row ? converterLinha(row) : undefined;
+      const info = updateStmt.run(intencaoId);
+
+      // Garante idempotência: somente estorna se de fato transicionou de status
+      if (info.changes > 0) {
+        incrementarVagas(row.eventoId, row.quantidade);
+        row.status = "expirada";
+      }
+    }
+
+    return converterLinha(row);
+  });
+
+  return processarConsultaEExpiracao();
+}
+
+// Varre todas as intenções pendentes que ultrapassaram a data de expiração,
+// atualizando seus status para 'expirada' e restaurando o estoque de vagas dos eventos correspondentes.
+export function expirarIntencoesVencidas(): number {
+  const agora = new Date().toISOString();
+
+  const sweepTransaction = db.transaction(() => {
+    const selectPendentesVencidas = db.prepare(`
+      SELECT
+        intencao_id AS intencaoId,
+        evento_id AS eventoId,
+        quantidade
+      FROM intencoes
+      WHERE status = 'pendente' AND expira_em <= ?
+    `);
+
+    const vencidas = selectPendentesVencidas.all(agora) as Array<{
+      intencaoId: string;
+      eventoId: string;
+      quantidade: number;
+    }>;
+
+    if (vencidas.length === 0) return 0;
+
+    const updateStmt = db.prepare(`
+      UPDATE intencoes
+      SET status = 'expirada'
+      WHERE intencao_id = ? AND status = 'pendente'
+    `);
+
+    let totalEstornadas = 0;
+    for (const intencao of vencidas) {
+      const info = updateStmt.run(intencao.intencaoId);
+      if (info.changes > 0) {
+        incrementarVagas(intencao.eventoId, intencao.quantidade);
+        totalEstornadas++;
+      }
+    }
+
+    return totalEstornadas;
+  });
+
+  return sweepTransaction();
 }
 
 // Atualiza o estado de uma intenção (ex: de 'pendente' para 'paga' ou 'expirada')

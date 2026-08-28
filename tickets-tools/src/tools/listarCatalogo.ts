@@ -6,6 +6,7 @@
 // Não há caminho de erro: lista vazia é retorno válido.
 
 import { listarEventos } from "../data/eventos";
+import { expirarIntencoesVencidas } from "../data/intencoes";
 import { registrarChamada } from "../logs/audit";
 
 /**
@@ -38,6 +39,9 @@ interface ProdutoCatalogo {
 export function listarCatalogo(args: ArgsListarCatalogo): {
   produtos: ProdutoCatalogo[];
 } {
+  // Libera vagas de intenções cujo prazo de 5 minutos expirou antes de listar
+  expirarIntencoesVencidas();
+
   // Consulta ao banco SQLite via função do módulo eventos (entregue pelo PR do colega)
   const eventos = listarEventos(args.categoria);
 
