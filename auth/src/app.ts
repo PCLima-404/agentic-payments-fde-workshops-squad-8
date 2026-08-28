@@ -1,4 +1,6 @@
-// auth/src/app.ts
+// TODO (Pessoa 1): setup do Express + rotas de autenticação
+// - POST /login (usuário/senha -> JWT)
+// - GET /me (dados do usuário autenticado, incluindo limite de gasto)
 import express from "express";
 import { buscarUsuarioPorUsername } from "./data/usuarios";
 import { verificarSenha } from "./utils/senha";
