@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { Intencao } from "../src/types";
 import { validarExpiracao } from "../src/validators/intencao.validator";
+import { realizarCompra } from "../src/tools/realizarCompra";
 
 // Suíte de testes unitários para a regra de validação do tempo de expiração da intenção
 describe("Validação de expiração da intenção", () => {
@@ -34,5 +35,25 @@ describe("Validação de expiração da intenção", () => {
     };
 
     expect(validarExpiracao(intencaoValida)).toBeNull();
+  });
+});
+
+// Suíte de testes unitários para a validação de intenções inexistentes ou não vinculadas ao usuário
+describe("Validação de intenção inexistente", () => {
+    // Garante que passar um intencao_id que não consta no banco retorne o contrato de erro INTENCAO_INVALIDA
+  it("deve retornar INTENCAO_INVALIDA para um intencao_id inexistente", async () => {
+    const resultado = await realizarCompra({
+      intencao_id: "int_inexistente",
+      metodo_pagamento: "cartao",
+      usuario_id: "user_001",
+      token: "token-teste",
+    });
+
+    expect(resultado).toEqual({
+      status: "recusado",
+      erro: "INTENCAO_INVALIDA",
+      mensagem:
+        "Essa intenção de compra não existe ou não pertence a este usuário.",
+    });
   });
 });
