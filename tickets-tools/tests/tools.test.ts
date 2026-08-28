@@ -4,6 +4,7 @@ import {
   validarPosse,
   validarStatusPago,
   validarExpiracao,
+  validarLimiteGasto,
 } from "../src/validators/intencao.validator";
 import { Intencao } from "../src/types";
 
@@ -101,5 +102,23 @@ describe("validarExpiracao", () => {
       expiraEm: new Date(Date.now() - 60_000).toISOString(), // no passado
     };
     expect(validarExpiracao(intencao)).toBe("INTENCAO_EXPIRADA");
+  });
+});
+
+describe("validarLimiteGasto", () => {
+  it("retorna null quando o valor total está dentro do limite disponível", () => {
+    expect(validarLimiteGasto(240, 500)).toBeNull();
+  });
+
+  it("retorna null quando o valor total é exatamente igual ao limite", () => {
+    expect(validarLimiteGasto(240, 240)).toBeNull();
+  });
+
+  it("retorna LIMITE_EXCEDIDO quando o valor total ultrapassa o limite disponível", () => {
+    expect(validarLimiteGasto(500, 240)).toBe("LIMITE_EXCEDIDO");
+  });
+
+  it("retorna LIMITE_EXCEDIDO quando o limite disponível é zero", () => {
+    expect(validarLimiteGasto(1, 0)).toBe("LIMITE_EXCEDIDO");
   });
 });
