@@ -31,6 +31,12 @@ Documento normativo de tipos, payloads, codigos de erro e diretrizes de prompt p
 
 - [6. Testes de Validacao da Intencao](#6-testes-de-validacao-da-intencao)
 
+- [7. Validacao de Limite de Gasto](#7-validacao-de-limite-de-gasto)
+
+- [8. Validacao de Metodo de Pagamento](#8-validacao-de-metodo-de-pagamento)
+
+- [9. Tratamento de Erro em Linguagem Natural](#9-tratamento-de-erro-em-linguagem-natural)
+
 ---
 
 ## 1. Visao Geral
@@ -192,30 +198,6 @@ if (!intencaoExiste) {
 
 Decisoes consolidadas pela equipe para a integracao entre modulos:
 
-### Mapeamento situação → erro
-
-| Situação                                           | Código de erro      |
-| -------------------------------------------------- | ------------------- |
-| `intencao_id` inexistente ou inventado pelo modelo | `INTENCAO_INVALIDA` |
-| Intenção pertencente a outro usuário               | `INTENCAO_INVALIDA` |
-| Intenção já utilizada em uma compra                | `INTENCAO_JA_PAGA`  |
-| Intenção fora do prazo de validade                 | `INTENCAO_EXPIRADA` |
-| Valor da intenção acima do limite do usuário       | `LIMITE_EXCEDIDO`   |
-| Método de pagamento diferente de `cartao`/`pix`    | `METODO_INVALIDO`   |
-| Qualquer falha não prevista                        | `ERRO_INTERNO`      |
-
-### Exemplo de uso dentro de uma tool
-
-```ts
-import { criarErro } from "../types/errors";
-
-if (!intencaoExiste) {
-  return criarErro("INTENCAO_INVALIDA");
-}
-```
-
-### Decisoes consolidadas
-
 - [x] Momento de reserva de vagas: Executado de forma atomica em `registrar_intencao` (`decrementarVagas`).
 
 - [x] Janela de expiracao da intencao: Fixada em 5 minutos a partir da emissao.
@@ -290,3 +272,52 @@ Os testes incluem:
 - simulação de tentativa de jailbreak utilizando `intencao_id` de outro usuário.
 
 ---
+
+## 7. Validacao de Limite de Gasto
+
+Antes de `realizar_compra` aprovar a transação, o backend valida se
+`valor_total` da intenção cabe dentro do `limiteGasto` retornado por
+`GET /me` no módulo `auth`, usando `validarLimiteGasto` em
+`tickets-tools/src/validators/intencao.validator.ts`.
+
+O valor comparado nunca é recalculado nem aceito do modelo nesta etapa —
+ele vem da intenção já persistida, calculada em `registrar_intencao`.
+Se o valor exceder o limite, retorna `LIMITE_EXCEDIDO`.
+
+---
+
+## 8. Validacao de Metodo de Pagamento
+
+Antes de `realizar_compra` prosseguir, o backend valida se
+`metodo_pagamento` é um dos valores aceitos (`"cartao"` ou `"pix"`),
+usando `validarMetodoPagamento` em
+`tickets-tools/src/validators/intencao.validator.ts`.
+
+Qualquer valor fora dessa lista — inclusive vazio, ausente, ou proposto
+pelo modelo fora do enum esperado — retorna `METODO_INVALIDO`.
+
+Com esta validação, `realizar_compra` cobre o conjunto completo de
+checagens antes de aprovar uma transação: `validarPosse`,
+`validarStatusPago`, `validarExpiracao`, `validarLimiteGasto` e
+`validarMetodoPagamento`.
+
+## 9. Tratamento de Erro em Linguagem Natural
+
+Antes de repassar o resultado de uma tool recusada (`ErroTool`) de volta
+ao usuário na conversa, `gemini-chat/src/utils/tratarErro.ts` converte o
+retorno estruturado em uma frase em linguagem natural, usando
+`tratarErroParaLinguagemNatural`.
+
+Prioridade da mensagem exibida:
+
+1. O campo `mensagem` retornado pela própria tool (mais específico ao caso).
+2. Um dicionário de mensagens amigáveis de fallback, indexado por
+   `CodigoErro`, mantido sincronizado com a tabela da seção 3.2.
+
+O tipo `ErroTool`/`CodigoErro` é espelhado localmente em
+`gemini-chat/src/types/errors.ts`, até existir compartilhamento de tipos
+entre os módulos do projeto.
+
+A função auxiliar `ehErroTool` permite ao loop de tool calling (ver
+próximo card) distinguir um retorno de sucesso de um `ErroTool`, sem
+depender de checagens frágeis por formato de string.
