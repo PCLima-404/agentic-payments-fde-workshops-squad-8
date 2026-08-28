@@ -19,6 +19,15 @@ npm install
 npm run dev
 ```
 
+## Banco de dados e seed
+O módulo utiliza SQLite para armazenar os eventos.
+
+Para criar a tabela e inserir os eventos iniciais:
+
+```bash
+npm run db:seed
+```
+
 ## Testes
 ```bash
 npm test
