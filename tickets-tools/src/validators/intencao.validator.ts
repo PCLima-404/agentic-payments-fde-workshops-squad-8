@@ -14,12 +14,32 @@ import { CodigoErro } from "../types/errors";
  */
 export function validarPosse(
   intencao: Intencao | undefined,
-  usuarioId: string
+  usuarioId: string,
 ): CodigoErro | null {
   // Intenção inexistente ou gerada com usuarioId diferente do autenticado
   if (!intencao || intencao.usuarioId !== usuarioId) {
     return "INTENCAO_INVALIDA";
   }
+  return null;
+}
+/**
+ * Valida se o valor total da intenção cabe dentro do limite de gasto
+ * disponível para o usuário, consultado no módulo auth (GET /me).
+ *
+ * O valor_total NUNCA é recalculado ou aceito do modelo aqui — ele já
+ * vem pronto da intenção persistida (calculada no backend em
+ * registrar_intencao). Essa função só compara contra o limite.
+ *
+ * Retorna null se o valor cabe no limite, ou "LIMITE_EXCEDIDO" se não cabe.
+ */
+export function validarLimiteGasto(
+  valorTotalIntencao: number,
+  limiteGastoDisponivel: number,
+): CodigoErro | null {
+  if (valorTotalIntencao > limiteGastoDisponivel) {
+    return "LIMITE_EXCEDIDO";
+  }
+
   return null;
 }
 

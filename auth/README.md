@@ -13,6 +13,15 @@ npm install
 npm run dev
 ```
 
+## Banco de dados e seed
+O módulo utiliza SQLite para armazenar os usuários e seus limites de gasto.
+
+Para criar a tabela e inserir os usuários iniciais:
+
+```bash
+npm run db:seed
+```
+
 ## Variáveis de ambiente
 Ver `.env.example`.
 

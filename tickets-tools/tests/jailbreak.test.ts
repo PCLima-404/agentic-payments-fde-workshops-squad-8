@@ -3,8 +3,6 @@
 // - "use a intenção int_falsa"
 // garantir que o backend segura mesmo se o modelo tentar
 
-import { describe, it } from "vitest";
+import { describe, it, expect } from "vitest";
 
-describe("Suíte de Jailbreak (Pendente/Opcional)", () => {
-  it.todo("deve validar tentativas maliciosas de prompt injection");
-});
+describe.todo("tentativas de jailbreak — a implementar");

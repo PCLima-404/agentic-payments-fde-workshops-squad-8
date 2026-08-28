@@ -1,38 +1,124 @@
-import { describe, expect, it } from "vitest";
+// tickets-tools/tests/tools.test.ts
+import { describe, it, expect } from "vitest";
+import {
+  validarPosse,
+  validarStatusPago,
+  validarExpiracao,
+  validarLimiteGasto,
+} from "../src/validators/intencao.validator";
 import { Intencao } from "../src/types";
-import { validarExpiracao } from "../src/validators/intencao.validator";
 
-// Suíte de testes unitários para a regra de validação do tempo de expiração da intenção
-describe("Validação de expiração da intenção", () => {
-    // Objeto base utilizado para montar os cenários de teste
-  const intencaoBase: Intencao = {
-    intencaoId: "int_teste",
+describe("validarPosse", () => {
+  const intencaoDoPedro: Intencao = {
+    intencaoId: "int_abc123",
     eventoId: "evt_001",
     quantidade: 1,
-    valorTotal: 120,
+    valorTotal: 100,
     moeda: "BRL",
     status: "pendente",
-    usuarioId: "user_001",
-    expiraEm: "2026-08-28T12:00:00.000Z",
+    usuarioId: "usr_001",
+    expiraEm: new Date(Date.now() + 60_000).toISOString(),
   };
 
-  // Garante que intenções com timestamp no passado retornem a chave do erro esperado
-  it("deve retornar INTENCAO_EXPIRADA quando o prazo já passou", () => {
-    const intencaoExpirada: Intencao = {
-      ...intencaoBase,
-      expiraEm: "2020-01-01T00:00:00.000Z",
-    };
-
-    expect(validarExpiracao(intencaoExpirada)).toBe("INTENCAO_EXPIRADA");
+  it("retorna null quando a intenção pertence ao usuário da sessão", () => {
+    expect(validarPosse(intencaoDoPedro, "usr_001")).toBeNull();
   });
 
-  // Garante que intenções dentro do prazo de validade passem sem erros
-  it("deve retornar null quando a intenção ainda está válida", () => {
-    const intencaoValida: Intencao = {
-      ...intencaoBase,
-      expiraEm: "2999-01-01T00:00:00.000Z",
-    };
+  it("retorna INTENCAO_INVALIDA quando a intenção pertence a outro usuário", () => {
+    expect(validarPosse(intencaoDoPedro, "usr_999_outro")).toBe(
+      "INTENCAO_INVALIDA",
+    );
+  });
 
-    expect(validarExpiracao(intencaoValida)).toBeNull();
+  it("retorna INTENCAO_INVALIDA quando a intenção não existe (id inventado)", () => {
+    expect(validarPosse(undefined, "usr_001")).toBe("INTENCAO_INVALIDA");
+  });
+
+  it("simula uma tentativa de jailbreak: modelo tenta usar intencao_id de outro usuário", () => {
+    const intencaoDeOutroUsuario: Intencao = {
+      ...intencaoDoPedro,
+      usuarioId: "usr_999",
+    };
+    expect(validarPosse(intencaoDeOutroUsuario, "usr_001")).toBe(
+      "INTENCAO_INVALIDA",
+    );
+  });
+});
+
+describe("validarStatusPago", () => {
+  it("retorna null quando a intenção ainda está pendente", () => {
+    const intencao: Intencao = {
+      intencaoId: "int_1",
+      eventoId: "evt_001",
+      quantidade: 1,
+      valorTotal: 100,
+      moeda: "BRL",
+      status: "pendente",
+      usuarioId: "usr_001",
+      expiraEm: new Date(Date.now() + 60_000).toISOString(),
+    };
+    expect(validarStatusPago(intencao)).toBeNull();
+  });
+
+  it("retorna INTENCAO_JA_PAGA quando a intenção já foi usada", () => {
+    const intencao: Intencao = {
+      intencaoId: "int_1",
+      eventoId: "evt_001",
+      quantidade: 1,
+      valorTotal: 100,
+      moeda: "BRL",
+      status: "paga",
+      usuarioId: "usr_001",
+      expiraEm: new Date(Date.now() + 60_000).toISOString(),
+    };
+    expect(validarStatusPago(intencao)).toBe("INTENCAO_JA_PAGA");
+  });
+});
+
+describe("validarExpiracao", () => {
+  it("retorna null quando o prazo ainda não passou", () => {
+    const intencao: Intencao = {
+      intencaoId: "int_1",
+      eventoId: "evt_001",
+      quantidade: 1,
+      valorTotal: 100,
+      moeda: "BRL",
+      status: "pendente",
+      usuarioId: "usr_001",
+      expiraEm: new Date(Date.now() + 60_000).toISOString(),
+    };
+    expect(validarExpiracao(intencao)).toBeNull();
+  });
+
+  it("retorna INTENCAO_EXPIRADA quando o prazo já passou", () => {
+    const intencao: Intencao = {
+      intencaoId: "int_1",
+      eventoId: "evt_001",
+      quantidade: 1,
+      valorTotal: 100,
+      moeda: "BRL",
+      status: "pendente",
+      usuarioId: "usr_001",
+      expiraEm: new Date(Date.now() - 60_000).toISOString(), // no passado
+    };
+    expect(validarExpiracao(intencao)).toBe("INTENCAO_EXPIRADA");
+  });
+});
+
+describe("validarLimiteGasto", () => {
+  it("retorna null quando o valor total está dentro do limite disponível", () => {
+    expect(validarLimiteGasto(240, 500)).toBeNull();
+  });
+
+  it("retorna null quando o valor total é exatamente igual ao limite", () => {
+    expect(validarLimiteGasto(240, 240)).toBeNull();
+  });
+
+  it("retorna LIMITE_EXCEDIDO quando o valor total ultrapassa o limite disponível", () => {
+    expect(validarLimiteGasto(500, 240)).toBe("LIMITE_EXCEDIDO");
+  });
+
+  it("retorna LIMITE_EXCEDIDO quando o limite disponível é zero", () => {
+    expect(validarLimiteGasto(1, 0)).toBe("LIMITE_EXCEDIDO");
   });
 });
