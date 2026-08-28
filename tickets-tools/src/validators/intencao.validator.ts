@@ -68,3 +68,24 @@ export function validarExpiracao(intencao: Intencao): CodigoErro | null {
   }
   return null;
 }
+
+const METODOS_ACEITOS = ["cartao", "pix"] as const;
+export type MetodoPagamento = (typeof METODOS_ACEITOS)[number];
+
+/**
+ * Valida se o método de pagamento informado em realizar_compra é um dos
+ * métodos aceitos ("cartao" ou "pix"). Qualquer outro valor — inclusive
+ * strings vazias, undefined, ou valores inventados/manipulados pelo
+ * modelo — retorna METODO_INVALIDO.
+ *
+ * Retorna null se o método é válido, ou "METODO_INVALIDO" se não for.
+ */
+export function validarMetodoPagamento(
+  metodo: string | undefined,
+): CodigoErro | null {
+  if (!metodo || !METODOS_ACEITOS.includes(metodo as MetodoPagamento)) {
+    return "METODO_INVALIDO";
+  }
+
+  return null;
+}
