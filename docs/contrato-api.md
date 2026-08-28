@@ -95,3 +95,22 @@ if (!intencaoExiste) {
 return criarErro("INTENCAO_INVALIDA");
 }
 \`\`\`
+
+## Vínculo de sessão ao escopo de intenções
+
+O `usuario_id` usado em `registrar_intencao` e demais tools que dependem de
+usuário **nunca** vem do modelo (Gemini) nem é enviado pelo cliente. Ele é
+sempre extraído do token JWT validado no backend e injetado no payload
+antes da chamada à tool MCP.
+
+Fluxo:
+
+1. Gemini decide chamar a tool e propõe o payload, ex: `registrar_intencao({ evento_id, quantidade })`
+2. O `route.ts` do `gemini-chat/` intercepta essa chamada
+3. Extrai o `usuario_id` do token da sessão autenticada (nunca do payload proposto pelo modelo)
+4. Monta o payload final: `registrar_intencao({ evento_id, quantidade, usuario_id })`
+5. Chama a tool MCP de verdade com esse payload já seguro
+
+Qualquer `usuario_id` que porventura viesse no payload proposto pelo modelo
+é **sobrescrito**, nunca confiado — ver `auth/src/session/escopoIntencao.ts`
+para a implementação de referência, validada em `auth/tests/escopoIntencao.test.ts`.
