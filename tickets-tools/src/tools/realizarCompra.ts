@@ -16,7 +16,10 @@ import {
   buscarIntencaoPorId,
 } from "../data/intencoes";
 import { transacoes } from "../data/transacoes";
-import { obterLimiteUsuario } from "../data/limites";
+import {
+  debitarLimiteUsuario,
+  obterLimiteUsuario,
+} from "../data/limites";
 import { gerarId } from "../utils/ids";
 import { registrarChamada } from "../logs/audit";
 import { criarErro, ErroTool } from "../types/errors";
@@ -147,6 +150,20 @@ export async function realizarCompra(
     return criarErro("LIMITE_EXCEDIDO");
   }
 
+  let limiteRestante: number;
+  try {
+    limiteRestante = await debitarLimiteUsuario(token, intencaoValida.valorTotal);
+  } catch (erro) {
+    registrarChamada({
+      tool: "realizar_compra",
+      usuarioId: usuario_id,
+      resultado: "recusado",
+      detalhe: "ERRO_INTERNO — falha ao debitar limite no auth/",
+      timestamp: new Date().toISOString(),
+    });
+    return criarErro("ERRO_INTERNO");
+  }
+
   // 8. Todas as validações passaram — processa a compra
 
 
@@ -166,9 +183,6 @@ export async function realizarCompra(
     data: dataCompra,
   };
   transacoes.set(transacaoId, transacao);
-
-  // Calcula o saldo restante após a compra
-  const limiteRestante = limite - intencaoValida.valorTotal;
 
   registrarChamada({
     tool: "realizar_compra",

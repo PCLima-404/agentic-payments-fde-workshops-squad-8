@@ -33,3 +33,36 @@ export async function obterLimiteUsuario(token: string): Promise<number> {
   const dados = (await resposta.json()) as { limiteGasto: number };
   return dados.limiteGasto;
 }
+
+/**
+ * Debita o valor da compra no limite do usuário autenticado.
+ *
+ * @param token - Token JWT do usuário
+ * @param valor - Valor da compra calculado pelo backend
+ * @returns Limite restante após o débito
+ */
+export async function debitarLimiteUsuario(
+  token: string,
+  valor: number
+): Promise<number> {
+  const resposta = await fetch(`${URL_AUTH}/me/limite`, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ valor }),
+  });
+
+  if (!resposta.ok) {
+    throw new Error(
+      `Falha ao debitar limite do usuário. Status: ${resposta.status}`
+    );
+  }
+
+  const dados = (await resposta.json()) as {
+    limiteRestante: number;
+  };
+
+  return dados.limiteRestante;
+}
