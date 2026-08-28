@@ -13,7 +13,7 @@
 // Prazo de expiração: 5 minutos a partir do momento de registro (decisão de equipe).
 
 import { buscarEventoPorId, decrementarVagas } from "../data/eventos";
-import { intencoes } from "../data/intencoes";
+import { salvarIntencao } from "../data/intencoes";
 import { gerarId } from "../utils/ids";
 import { registrarChamada } from "../logs/audit";
 import { criarErro, ErroTool } from "../types/errors";
@@ -106,8 +106,8 @@ export function registrarIntencao(
     expiraEm,
   };
 
-  // Persiste a intenção no Map em memória
-  intencoes.set(intencaoId, intencao);
+  // Persiste a intenção no banco de dados
+  salvarIntencao(intencao);
 
   registrarChamada({
     tool: "registrar_intencao",
