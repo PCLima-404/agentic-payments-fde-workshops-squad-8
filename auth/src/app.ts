@@ -2,14 +2,17 @@
 // - POST /login (usuário/senha -> JWT)
 // - GET /me (dados do usuário autenticado, incluindo limite de gasto)
 import express from "express";
+import { buscarUsuarioPorUsername } from "./data/usuarios";
+import { verificarSenha } from "./utils/senha";
+import { gerarToken } from "./utils/token";
+import { autenticar } from "./middleware/auth.middleware";
 
 const app = express();
 app.use(express.json());
 
-<<<<<<< HEAD
 app.post("/login", (req, res) => {
   const { username, senha } = req.body;
-  const usuario = usuarios.get(username);
+  const usuario = buscarUsuarioPorUsername(username);
 
   if (!usuario || !verificarSenha(senha, usuario.senhaHash)) {
     return res.status(401).json({ erro: "CREDENCIAIS_INVALIDAS" });
@@ -21,7 +24,7 @@ app.post("/login", (req, res) => {
 
 app.get("/me", autenticar, (req, res) => {
   const { username } = (req as any).usuario;
-  const usuario = usuarios.get(username);
+  const usuario = buscarUsuarioPorUsername(username);
   res.json({
     id: usuario?.id,
     username: usuario?.username,
@@ -40,8 +43,5 @@ app.get("/chat-stub", autenticar, (req, res) => {
     usuario,
   });
 });
-=======
-// rotas aqui
->>>>>>> origin/prod
 
 export default app;
