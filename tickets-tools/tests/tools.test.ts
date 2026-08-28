@@ -5,6 +5,7 @@ import {
   validarStatusPago,
   validarExpiracao,
   validarLimiteGasto,
+  validarMetodoPagamento,
 } from "../src/validators/intencao.validator";
 import { Intencao } from "../src/types";
 
@@ -120,5 +121,27 @@ describe("validarLimiteGasto", () => {
 
   it("retorna LIMITE_EXCEDIDO quando o limite disponível é zero", () => {
     expect(validarLimiteGasto(1, 0)).toBe("LIMITE_EXCEDIDO");
+  });
+});
+
+describe("validarMetodoPagamento", () => {
+  it("retorna null quando o método é 'pix'", () => {
+    expect(validarMetodoPagamento("pix")).toBeNull();
+  });
+
+  it("retorna null quando o método é 'cartao'", () => {
+    expect(validarMetodoPagamento("cartao")).toBeNull();
+  });
+
+  it("retorna METODO_INVALIDO quando o método é um valor inventado", () => {
+    expect(validarMetodoPagamento("boleto")).toBe("METODO_INVALIDO");
+  });
+
+  it("retorna METODO_INVALIDO quando o método é undefined", () => {
+    expect(validarMetodoPagamento(undefined)).toBe("METODO_INVALIDO");
+  });
+
+  it("retorna METODO_INVALIDO quando o método é string vazia", () => {
+    expect(validarMetodoPagamento("")).toBe("METODO_INVALIDO");
   });
 });
