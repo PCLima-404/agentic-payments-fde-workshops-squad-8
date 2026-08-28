@@ -20,8 +20,7 @@ Documento normativo de tipos, payloads, codigos de erro e diretrizes de prompt p
 - [3. Padronizacao de Erros](#3-padronizacao-de-erros)
   - [3.1. Formato ErroTool](#31-formato-errotool)
   - [3.2. Mapeamento Situacao vs Codigo](#32-mapeamento-situacao-vs-codigo)
-- [4. Diretrizes de Prompt para o Agente](#4-diretrizes-de-prompt-para-o-agente)
-- [5. Registro de Decisoes Tecnicas](#5-registro-de-decisoes-tecnicas)
+- [4. Registro de Decisoes Tecnicas](#4-registro-de-decisoes-tecnicas)
 
 ---
 
@@ -170,20 +169,7 @@ export interface ErroTool {
 
 ---
 
-## 4. Diretrizes de Prompt para o Agente
-
-Ao receber uma resposta de erro (`status: "recusado"`), o agente conversacional deve seguir as seguintes diretrizes de comunicacao em linguagem natural:
-
-1. **Nunca simular aprovacao**: Se a tool retornou `recusado`, o agente jamais deve confirmar a transacao ao usuario.
-2. **Explicacao clara e objetiva**: Utilizar a propriedade `mensagem` como base para explicar a causa ao usuario.
-3. **Tratamento de `VAGAS_INSUFICIENTES`**: Informar que as vagas esgotaram ou que a quantidade solicitada excede o saldo restante. Sugerir consultar novamente o catalogo ou escolher uma quantidade menor.
-4. **Tratamento de `LIMITE_EXCEDIDO`**: Informar que o limite disponivel foi ultrapassado. Nao tentar contornar a restricao.
-5. **Tratamento de `INTENCAO_EXPIRADA`**: Esclarecer que a reserva temporaria de 5 minutos expirou e oferecer o registro de uma nova intencao de compra.
-6. **Orientacao sobre metodos aceitos**: Caso ocorra `METODO_INVALIDO`, orientar explicitamente as opcoes aceitas (cartao ou pix).
-
----
-
-## 5. Registro de Decisoes Tecnicas
+## 4. Registro de Decisoes Tecnicas
 
 Decisoes consolidadas pela equipe para a integracao entre modulos:
 
