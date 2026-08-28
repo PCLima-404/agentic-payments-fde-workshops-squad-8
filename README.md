@@ -65,6 +65,7 @@
 - [Instalacao e Execucao](#instalacao-e-execucao)
   - [Pre-requisitos](#pre-requisitos)
   - [Variaveis de Ambiente](#variaveis-de-ambiente)
+  - [Inicializacao dos bancos e seeds](#inicializacao-dos-bancos-e-seeds)
   - [Executando Localmente](#executando-localmente)
 - [Testes](#testes)
 - [Screenshots e Demonstracoes](#screenshots-e-demonstracoes)
@@ -295,6 +296,20 @@ Cada modulo possui seu proprio arquivo de exemplo:
 > **Atencao:** A chave da Gemini API deve ser configurada exclusivamente no backend
 > (`gemini-chat/src/app/api/chat/route.ts`). Nunca exponha a chave no cliente.
 
+### Inicializacao dos bancos e seeds
+
+Antes de iniciar os serviços, execute os seeds para criar e preencher os bancos SQLite:
+
+```bash
+cd auth
+npm install
+npm run db:seed
+
+cd ../tickets-tools
+npm install
+npm run db:seed
+```
+
 ### Executando Localmente
 
 ```bash
@@ -433,6 +448,8 @@ cd tickets-tools && npm test
 | @time - Definir stack (linguagem e paradigma), modelo LLM (Ollama local vs. API na nuvem) e transporte MCP (stdio ou HTTP) | 27/08/2026        |
 | @Pedro César  - Inicializar repositório e estrutura de pastas                                                              | 27/08/2026        |
 | @Pedro César  - Padronizar contrato de erro das tools                                                                      | 27/08/2026        |
+| @Luis Filipe Mendes Nogueira  - Criar seed do catálogo de eventos | 27/08/2026 |
+| @Luis Filipe Mendes Nogueira - Criar seed de usuários com limite de gasto | 28/08/2026 |
 |                                                                                                                            |                   |
 
 ### Epicos do Kanban
