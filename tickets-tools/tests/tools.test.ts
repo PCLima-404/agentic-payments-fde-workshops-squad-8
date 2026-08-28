@@ -1,5 +1,6 @@
 // tickets-tools/tests/tools.test.ts
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
+import * as limitesModule from "../src/data/limites";
 import {
   validarPosse,
   validarStatusPago,
@@ -173,6 +174,9 @@ describe("Validação de intenção inexistente", () => {
 
 describe("Integração da compra com limite e intenção", () => {
   it("deve debitar o limite e marcar a intenção como paga", async () => {
+    vi.spyOn(limitesModule, "obterLimiteUsuario").mockResolvedValue(500);
+    vi.spyOn(limitesModule, "debitarLimiteUsuario").mockResolvedValue(380);
+
     const intencao: Intencao = {
       intencaoId: `int_teste_${Date.now()}`,
       eventoId: "evt_001",
@@ -190,7 +194,7 @@ describe("Integração da compra com limite e intenção", () => {
       intencao_id: intencao.intencaoId,
       metodo_pagamento: "pix",
       usuario_id: "usr_001",
-      token: process.env.TOKEN_TESTE!,
+      token: "token_teste_123",
     });
 
     expect(resultado).toMatchObject({
