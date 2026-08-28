@@ -15,6 +15,7 @@ import {
   atualizarStatusIntencao,
 } from "../src/data/intencoes";
 import { listarCatalogo } from "../src/tools/listarCatalogo";
+import { registrarIntencao } from "../src/tools/registrarIntencao";
 import { Intencao } from "../src/types";
 
 describe("Regra de Negócio: Estorno e Devolução de Vagas de Intenções Expiradas", () => {
@@ -219,6 +220,42 @@ describe("Regra de Negócio: Estorno e Devolução de Vagas de Intenções Expir
 
       expect(produto005).toBeDefined();
       expect(produto005?.estoque).toBe(2); // Vagas restauradas no catálogo
+    });
+  });
+
+  describe("Integração com registrar_intencao (Prevenção de Denial of Inventory)", () => {
+    it("deve liberar vagas expiradas e permitir novo registro mesmo sem consultar o catálogo previamente", () => {
+      // Esgota as 2 vagas do evento evt_005 com uma intenção que expira
+      decrementarVagas("evt_005", 2);
+      expect(buscarEventoPorId("evt_005")!.vagasRestantes).toBe(0);
+
+      salvarIntencao({
+        intencaoId: "int_esgotou_e_expirou",
+        eventoId: "evt_005",
+        quantidade: 2,
+        valorTotal: 580,
+        moeda: "BRL",
+        status: "pendente",
+        usuarioId: "usr_antigo",
+        expiraEm: new Date(Date.now() - 2000).toISOString(), // expirada
+      });
+
+      // Novo usuário chama diretamente registrar_intencao sem listar catálogo
+      const novaIntencao = registrarIntencao({
+        evento_id: "evt_005",
+        quantidade: 1,
+        usuario_id: "usr_novo",
+      });
+
+      // Deve aprovar com sucesso porque as vagas expiradas foram estornadas antes da checagem
+      expect(novaIntencao).toHaveProperty("intencaoId");
+      if ("intencaoId" in novaIntencao) {
+        expect(novaIntencao.status).toBe("pendente");
+        expect(novaIntencao.quantidade).toBe(1);
+      }
+
+      // Resta 1 vaga disponível
+      expect(buscarEventoPorId("evt_005")!.vagasRestantes).toBe(1);
     });
   });
 });

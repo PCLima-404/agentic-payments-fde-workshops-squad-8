@@ -147,6 +147,18 @@ export function expirarIntencoesVencidas(): number {
   return sweepTransaction();
 }
 
+// Confirma o pagamento de uma intenção,
+// garantindo que ela ainda esteja com status 'pendente' e não tenha sido expirada/estornada concorrentemente.
+export function confirmarPagamentoIntencao(intencaoId: string): boolean {
+  const stmt = db.prepare(`
+    UPDATE intencoes
+    SET status = 'paga'
+    WHERE intencao_id = ? AND status = 'pendente'
+  `);
+
+  return stmt.run(intencaoId).changes > 0;
+}
+
 // Atualiza o estado de uma intenção (ex: de 'pendente' para 'paga' ou 'expirada')
 export function atualizarStatusIntencao(
   intencaoId: string,

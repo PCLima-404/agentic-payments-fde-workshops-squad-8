@@ -86,4 +86,67 @@ describe("Segurança do Backend e Resistência a Jailbreak / Manipulação de Va
       mensagem: expect.any(String),
     });
   });
+
+  it("garante bloqueio de race condition/TOCTOU: recusa compra se a intenção expirar durante o processamento", async () => {
+    vi.spyOn(limitesModule, "obterLimiteUsuario").mockResolvedValue(500);
+    vi.spyOn(limitesModule, "debitarLimiteUsuario").mockResolvedValue(380);
+
+    const intencaoId = `int_toctou_${Date.now()}`;
+
+    // Intenção inicialmente salva
+    salvarIntencao({
+      intencaoId,
+      eventoId: "evt_001",
+      quantidade: 1,
+      valorTotal: 120.0,
+      moeda: "BRL",
+      status: "expirada", // Já foi marcada como expirada concorrentemente
+      usuarioId: "usr_001",
+      expiraEm: new Date(Date.now() - 5000).toISOString(),
+    });
+
+    const resultado = await realizarCompra({
+      intencao_id: intencaoId,
+      metodo_pagamento: "cartao",
+      usuario_id: "usr_001",
+      token: "token_mock",
+    });
+
+    // Deve ser recusada com INTENCAO_EXPIRADA ou INTENCAO_JA_PAGA e nunca aprovada
+    expect(resultado.status).toBe("recusado");
+    if ("erro" in resultado) {
+      expect(["INTENCAO_EXPIRADA", "INTENCAO_INVALIDA"]).toContain(resultado.erro);
+    }
+  });
+
+  it("garante que o modelo não consegue revalidar intenção expirada injetando novo expira_em no payload", async () => {
+    const intencaoId = `int_bypass_exp_${Date.now()}`;
+
+    salvarIntencao({
+      intencaoId,
+      eventoId: "evt_001",
+      quantidade: 1,
+      valorTotal: 120.0,
+      moeda: "BRL",
+      status: "pendente",
+      usuarioId: "usr_001",
+      expiraEm: new Date(Date.now() - 60000).toISOString(), // expirada no banco
+    });
+
+    // Modelo tenta injetar expira_em no futuro na chamada de realizar_compra
+    const argsComBypass = {
+      intencao_id: intencaoId,
+      metodo_pagamento: "pix" as const,
+      usuario_id: "usr_001",
+      token: "token_mock",
+      expira_em: new Date(Date.now() + 600000).toISOString(), // tentativa de bypass
+    };
+
+    const resultado = await realizarCompra(argsComBypass as any);
+
+    expect(resultado.status).toBe("recusado");
+    if ("erro" in resultado) {
+      expect(resultado.erro).toBe("INTENCAO_EXPIRADA");
+    }
+  });
 });
