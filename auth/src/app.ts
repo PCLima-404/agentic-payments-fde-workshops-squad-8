@@ -30,9 +30,7 @@ app.get("/me", autenticar, (req, res) => {
   });
 });
 
-// Stub temporário: simula a rota de chat protegida.
 // Serve para validar isoladamente que o middleware bloqueia acesso sem sessão válida,
-// antes que o gemini-chat/ exista de verdade.
 // Quando o route.ts real do gemini-chat/ estiver pronto, ele deve usar o mesmo padrão
 // (aplicar `autenticar` antes de qualquer lógica do chat).
 app.get("/chat-stub", autenticar, (req, res) => {
