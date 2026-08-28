@@ -1,4 +1,3 @@
-// TODO (Pessoa 2): tipos compartilhados entre as tools
 export interface Evento {
   id: string;
   nome: string;
