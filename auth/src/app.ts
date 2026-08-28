@@ -1,13 +1,12 @@
-// auth/src/app.ts
+// TODO (Pessoa 1): setup do Express + rotas de autenticação
+// - POST /login (usuário/senha -> JWT)
+// - GET /me (dados do usuário autenticado, incluindo limite de gasto)
 import express from "express";
-import { usuarios } from "./data/usuarios";
-import { verificarSenha } from "./utils/senha";
-import { gerarToken } from "./utils/token";
-import { autenticar } from "./middleware/auth.middleware";
 
 const app = express();
 app.use(express.json());
 
+<<<<<<< HEAD
 app.post("/login", (req, res) => {
   const { username, senha } = req.body;
   const usuario = usuarios.get(username);
@@ -41,5 +40,8 @@ app.get("/chat-stub", autenticar, (req, res) => {
     usuario,
   });
 });
+=======
+// rotas aqui
+>>>>>>> origin/prod
 
 export default app;

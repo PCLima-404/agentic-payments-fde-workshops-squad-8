@@ -9,15 +9,18 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "express": "^4.22.2",
-    "jsonwebtoken": "^9.0.3"
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2"
   },
   "devDependencies": {
-    "@types/express": "^4.17.25",
-    "@types/jsonwebtoken": "^9.0.10",
-    "@types/node": "^20.19.43",
+    "typescript": "^5.5.4",
     "ts-node-dev": "^2.0.0",
+<<<<<<< HEAD
     "typescript": "^5.9.3",
     "vitest": "^4.1.11"
+=======
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.14.0"
+>>>>>>> origin/prod
   }
 }
