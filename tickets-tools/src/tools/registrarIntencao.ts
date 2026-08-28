@@ -18,6 +18,7 @@ import { gerarId } from "../utils/ids";
 import { registrarChamada } from "../logs/audit";
 import { criarErro, ErroTool } from "../types/errors";
 import { Intencao } from "../types";
+import { calcularValorTotal } from "../validators/calculo.validator";
 
 // Prazo de expiração da intenção em minutos (decisão de equipe: 5 minutos)
 const MINUTOS_EXPIRACAO = 5;
@@ -83,8 +84,8 @@ export function registrarIntencao(
     return criarErro("VAGAS_INSUFICIENTES");
   }
 
-  // Calcula valor total no backend — cliente nunca envia valor
-  const valorTotal = evento.preco * quantidade;
+  // Calcula valor total no backend via regra de domínio — cliente nunca envia valor
+  const valorTotal = calcularValorTotal(evento.preco, quantidade);
 
   // Calcula o timestamp de expiração (agora + MINUTOS_EXPIRACAO)
   const expiraEm = new Date(
