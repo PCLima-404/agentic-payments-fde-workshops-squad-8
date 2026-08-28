@@ -11,7 +11,10 @@
 //   4. Intenção dentro do prazo (INTENCAO_EXPIRADA)
 //   5. Valor total dentro do limite do usuário (LIMITE_EXCEDIDO)
 
-import { intencoes } from "../data/intencoes";
+import {
+  atualizarStatusIntencao,
+  buscarIntencaoPorId,
+} from "../data/intencoes";
 import { transacoes } from "../data/transacoes";
 import { obterLimiteUsuario } from "../data/limites";
 import { gerarId } from "../utils/ids";
@@ -72,8 +75,8 @@ export async function realizarCompra(
     return criarErro("METODO_INVALIDO");
   }
 
-  // 2. Busca a intenção no Map em memória
-  const intencao = intencoes.get(intencao_id);
+  // 2. Busca a intenção no banco de dados
+  const intencao = buscarIntencaoPorId(intencao_id);
 
   // 3. Valida posse: intenção deve existir e pertencer ao usuário autenticado
   const erroPosse = validarPosse(intencao, usuario_id);
@@ -146,9 +149,9 @@ export async function realizarCompra(
 
   // 8. Todas as validações passaram — processa a compra
 
-  // Marca a intenção como paga no Map (garante idempotência: não pode ser usada novamente)
-  intencaoValida.status = "paga";
-  intencoes.set(intencao_id, intencaoValida);
+
+  // Marca a intenção como paga no banco de dados (garante idempotência: não pode ser usada novamente)
+  atualizarStatusIntencao(intencao_id, "paga");
 
   // Gera identificador único da transação
   const transacaoId = gerarId("tx");
