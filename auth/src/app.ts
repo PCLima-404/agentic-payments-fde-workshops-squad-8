@@ -20,7 +20,6 @@ app.post("/login", (req, res) => {
   res.json({ token });
 });
 
-// GET /me: usado pelo tickets-tools para checar o limiteGasto, nunca vindo do frontend/prompt
 app.get("/me", autenticar, (req, res) => {
   const { username } = (req as any).usuario;
   const usuario = usuarios.get(username);
@@ -28,6 +27,20 @@ app.get("/me", autenticar, (req, res) => {
     id: usuario?.id,
     username: usuario?.username,
     limiteGasto: usuario?.limiteGasto,
+  });
+});
+
+// Stub temporário: simula a rota de chat protegida.
+// Serve para validar isoladamente que o middleware bloqueia acesso sem sessão válida,
+// antes que o gemini-chat/ exista de verdade.
+// Quando o route.ts real do gemini-chat/ estiver pronto, ele deve usar o mesmo padrão
+// (aplicar `autenticar` antes de qualquer lógica do chat).
+app.get("/chat-stub", autenticar, (req, res) => {
+  const usuario = (req as any).usuario;
+  res.json({
+    ok: true,
+    mensagem: "Acesso ao chat permitido — sessão válida.",
+    usuario,
   });
 });
 
