@@ -95,7 +95,7 @@ export function buscarEventoPorId(id: string): Evento | undefined {
     return stmt.get(id) as Evento | undefined;
 }
 
-//Subtrai a quantidade de ingressos comprados do saldo de vagas disponíveis no evento, garantindo que o estoque não fique negativo.
+// Subtrai a quantidade de ingressos comprados do saldo de vagas disponíveis no evento, garantindo que o estoque não fique negativo.
 export function decrementarVagas(id: string, quantidade: number): boolean {
     const stmt = db.prepare(`
     UPDATE eventos 
@@ -103,5 +103,19 @@ export function decrementarVagas(id: string, quantidade: number): boolean {
     WHERE id = ? AND vagas_restantes >= ?
   `);
     const info = stmt.run(quantidade, id, quantidade);
+    return info.changes > 0;
+}
+
+// Restaura/estorna a quantidade de vagas disponíveis em caso de expiração de intenção,
+// garantindo atomicidade e limitando o saldo ao teto original de vagas_totais.
+export function incrementarVagas(id: string, quantidade: number): boolean {
+    if (quantidade <= 0) return false;
+
+    const stmt = db.prepare(`
+    UPDATE eventos 
+    SET vagas_restantes = MIN(vagas_totais, vagas_restantes + ?) 
+    WHERE id = ?
+  `);
+    const info = stmt.run(quantidade, id);
     return info.changes > 0;
 }

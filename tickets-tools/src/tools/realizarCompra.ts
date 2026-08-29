@@ -12,7 +12,7 @@
 //   5. Valor total dentro do limite do usuário (LIMITE_EXCEDIDO)
 
 import {
-  atualizarStatusIntencao,
+  confirmarPagamentoIntencao,
   buscarIntencaoPorId,
 } from "../data/intencoes";
 import { transacoes } from "../data/transacoes";
@@ -165,10 +165,18 @@ export async function realizarCompra(
   }
 
   // 8. Todas as validações passaram — processa a compra
-
-
-  // Marca a intenção como paga no banco de dados (garante idempotência: não pode ser usada novamente)
-  atualizarStatusIntencao(intencao_id, "paga");
+  // Atualiza a intenção para 'paga' garantindo que ainda está 'pendente'
+  const pagou = confirmarPagamentoIntencao(intencao_id);
+  if (!pagou) {
+    registrarChamada({
+      tool: "realizar_compra",
+      usuarioId: usuario_id,
+      resultado: "recusado",
+      detalhe: "INTENCAO_EXPIRADA — intenção expirada durante processamento",
+      timestamp: new Date().toISOString(),
+    });
+    return criarErro("INTENCAO_EXPIRADA");
+  }
 
   // Gera identificador único da transação
   const transacaoId = gerarId("tx");

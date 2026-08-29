@@ -13,7 +13,7 @@
 // Prazo de expiração: 5 minutos a partir do momento de registro (decisão de equipe).
 
 import { buscarEventoPorId, decrementarVagas } from "../data/eventos";
-import { salvarIntencao } from "../data/intencoes";
+import { salvarIntencao, expirarIntencoesVencidas } from "../data/intencoes";
 import { gerarId } from "../utils/ids";
 import { registrarChamada } from "../logs/audit";
 import { criarErro, ErroTool } from "../types/errors";
@@ -42,6 +42,9 @@ export function registrarIntencao(
   args: ArgsRegistrarIntencao
 ): Intencao | ErroTool {
   const { evento_id, quantidade, usuario_id } = args;
+
+  // Libera proativamente quaisquer intenções que já tenham vencido antes de avaliar o estoque
+  expirarIntencoesVencidas();
 
   // Busca o evento no banco SQLite (função entregue pelo PR do colega)
   const evento = buscarEventoPorId(evento_id);
