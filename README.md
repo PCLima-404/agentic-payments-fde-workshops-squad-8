@@ -381,11 +381,17 @@ npm test
 | **auth**          | `tests/escopoIntencao.test.ts` | 3            | Vínculo de `usuario_id` e extração de identidade de sessão                                |
 | **tickets-tools** | `tests/calculo.test.ts`        | 12           | Precisão decimal (IEEE 754), números inteiros, quantidades e valores positivos            |
 | **tickets-tools** | `tests/tools.test.ts`          | 19           | Validação de catálogo, registro de intenção, compra aprovada e casos de erro (`ErroTool`) |
-| **tickets-tools** | `tests/jailbreak.test.ts`      | 3            | Resistência a bypass de valores, injeção de payloads e intenções forjadas                 |
+| **tickets-tools** | `tests/jailbreak.test.ts`      | 5            | Resistência a bypass de valores, injeção de payloads, TOCTOU e datas forjadas              |
+| **tickets-tools** | `tests/estorno.test.ts`        | 8            | Estorno de vagas expiradas, varredura em lote e liberação proativa de assentos             |
 | **gemini-chat**   | `tests/mcpClient.test.ts`      | 8            | Transporte Stdio, Singleton, listagem dinâmica e execução de chamadas MCP                 |
 | **gemini-chat**   | `tests/mcpAdapter.test.ts`     | 5            | Conversão de tipos JSONSchema para Gemini e remoção de credenciais de sessão              |
 | **gemini-chat**   | `tests/mcpExecutor.test.ts`    | 6            | Injeção mandatória de `usuario_id`/`token`, blindagem anti-tampering e validações         |
 | **gemini-chat**   | `tests/tratarErro.test.ts`     | 6            | Tradução de todos os códigos de `ErroTool` para linguagem natural amigável                |
+
+### Validação de Dependências e Requisitos (requirements.txt)
+
+Todas as versões de runtime, protocolos e pacotes fixados no arquivo [`requirements.txt`](./requirements.txt) refletem o estado funcional do monorepo e são validados cruzadamente contra os `package.json` dos três módulos (`auth/`, `tickets-tools/`, `gemini-chat/`), garantindo reprodutibilidade e conformidade técnica para homologação.
+
 
 ---
 
