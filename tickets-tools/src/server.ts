@@ -13,9 +13,9 @@
 // Quando o gemini-chat migrar para ESM ou o projeto adotar "type":"module",
 // esses imports podem ser revertidos para @modelcontextprotocol/sdk/server/mcp etc.
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const { McpServer } = require("@modelcontextprotocol/sdk/dist/cjs/server/mcp.js") as typeof import("@modelcontextprotocol/sdk/dist/cjs/server/mcp.js");
+const { McpServer } = require("@modelcontextprotocol/sdk/server/mcp.js") as typeof import("@modelcontextprotocol/sdk/server/mcp.js");
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const { StdioServerTransport } = require("@modelcontextprotocol/sdk/dist/cjs/server/stdio.js") as typeof import("@modelcontextprotocol/sdk/dist/cjs/server/stdio.js");
+const { StdioServerTransport } = require("@modelcontextprotocol/sdk/server/stdio.js") as typeof import("@modelcontextprotocol/sdk/server/stdio.js");
 import { z } from "zod";
 
 import { listarCatalogo, ArgsListarCatalogo } from "./tools/listarCatalogo";
