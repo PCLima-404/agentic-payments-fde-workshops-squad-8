@@ -1,6 +1,6 @@
 <!--
   README.md: agentic-payments-fde-workshops | Squad 8
-  Contexto: Projeto de finalizacao de estagio: UOL / Agentic Payments
+  Contexto: Projeto de finalizacao de bootcamp: UOL / Agentic Payments 2026.2
 -->
 
 <!-- =========================================================
@@ -19,6 +19,8 @@
 ![Licenca](https://img.shields.io/badge/licen%C3%A7a-privado-red?style=flat-square)
 
 ---
+
+![header](./docs/headers/agentic-payments-fde-workshops-mainheader-squad8.webp)
 
 # agentic-payments-fde-workshops (Squad 8)
 
@@ -65,18 +67,18 @@
 
 ## Visao Geral
 
-O projeto implementa uma arquitetura robusta de **Pagamentos Agênticos** orientada a ferramentas, separando de forma estrita o plano de raciocínio da IA do plano de execução financeira e controle de estoque.
+O projeto implementa uma arquitetura local de **Pagamentos Agênticos** orientada a ferramentas, separando de forma estrita o plano de raciocínio da IA do plano de execução financeira e controle de estoque.
 
-| Atributo                | Valor                                                                                                                                                                                |
-| ------------------------| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **Contexto**            | Projeto de finalizacao: UOL / Agentic Payments                                                                                                                                      |
-| **Squad**               | Squad 8                                                                                                                                                                              |
-| **Branch de entrega**   | `main`                                                                                                                                                                               |
-| **Convenções**          | Commits Semânticos (Conventional Commits), Gitflow adaptado (prod, stage, dev, feature/*, fix/*, documentation/*)                                                                    |
-| **Paradigma principal** | LLM com Function Calling (Tool Calling), injeção segura de credenciais no backend (Shielding Layer), persistência transacional com SQLite e auditoria estruturada                    |
-| **Protocolo de tools**  | Model Context Protocol (MCP 1.0) via Stdio Transport                                                                                                                                |
-| **LLM utilizado**       | Google Gemini (gemini-2.5-flash / gemini-1.5-flash via `@google/generative-ai`)                                                                                                      |
-| **Equipe**              | Pedro César Padre de Lima, Éverson Filipe Campos da Silva Moura, Luis Filipe Mendes Nogueira                                                                                         |
+| Atributo                | Valor                                                                                                                                                             |
+| -------------------------| -------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Contexto**            | Projeto de finalizacao: UOL / Agentic Payments e hand-off para a fase 2                                                                                           |
+| **Squad**               | Squad 8                                                                                                                                                           |
+| **Branch de entrega**   | `main`                                                                                                                                                            |
+| **Convenções**          | Commits Semânticos (Conventional Commits), Gitflow adaptado (prod, stage, dev, feature/*, fix/*, documentation/*)                                                 |
+| **Paradigma principal** | LLM com Function Calling (Tool Calling), injeção segura de credenciais no backend (Shielding Layer), persistência transacional com SQLite e auditoria estruturada |
+| **Protocolo de tools**  | Model Context Protocol (MCP 1.0) via Stdio Transport                                                                                                              |
+| **LLM utilizado**       | Google Gemini (gemini-2.5-flash / gemini-1.5-flash via `@google/generative-ai`)                                                                                   |
+| **Equipe**              | Pedro César Padre de Lima, Éverson Filipe Campos da Silva Moura, Luis Filipe Mendes Nogueira                                                                      |
 
 ---
 
@@ -165,20 +167,20 @@ O projeto implementa uma arquitetura robusta de **Pagamentos Agênticos** orient
 
 ### Stack Tecnica
 
-| Tecnologia                  | Modulo(s)                 | Versao      | Finalidade                                                                       |
-| --------------------------- | ------------------------- | ----------- | -------------------------------------------------------------------------------- |
-| **Node.js**                 | Todos                     | `^20.14.0+` | Runtime JavaScript assíncrono                                                    |
-| **TypeScript**              | Todos                     | `^5.5.4+`   | Tipagem estática, interfaces e contratos de domínio                              |
-| **Google Generative AI SDK**| `gemini-chat`             | `^0.19.0`   | SDK oficial da API Gemini para orquestração de chat e Function Calling           |
-| **MCP SDK**                 | `tickets-tools`, `gemini-chat` | `^1.0.0` | Implementação do protocolo Model Context Protocol (Server e Stdio Client)       |
-| **Next.js**                 | `gemini-chat`             | `^14.2.0`   | Framework fullstack React com API Routes (App Router)                            |
-| **React**                   | `gemini-chat`             | `^18.3.0`   | Biblioteca declarativa para construção de interfaces de usuário                  |
-| **Express**                 | `auth`                    | `^4.22.2`   | Framework HTTP para microsserviço de autenticação e gestão de limites            |
-| **better-sqlite3**          | `auth`, `tickets-tools`   | `^11.8.1`   | Driver síncrono e de alta performance para SQLite com suporte a transações e WAL |
-| **Zod**                     | `tickets-tools`           | `^3.23.8`   | Validação de schemas e contratos de entrada das ferramentas MCP                  |
-| **jsonwebtoken**            | `auth`                    | `^9.0.3`    | Emissão, assinatura e verificação de tokens JWT (RFC 7519)                       |
-| **Vitest**                  | Todos                     | `^2.0.0+` / `^4.1.11` | Suíte de testes unitários, testes de integração e testes adversariais  |
-| **Supertest**               | `auth`                    | `^7.2.2`    | Testes de integração HTTP para endpoints da API Express                          |
+| Tecnologia                   | Modulo(s)                      | Versao                | Finalidade                                                                       |
+| ------------------------------| --------------------------------| -----------------------| ----------------------------------------------------------------------------------|
+| **Node.js**                  | Todos                          | `^20.14.0+`           | Runtime JavaScript assíncrono                                                    |
+| **TypeScript**               | Todos                          | `^5.5.4+`             | Tipagem estática, interfaces e contratos de domínio                              |
+| **Google Generative AI SDK** | `gemini-chat`                  | `^0.19.0`             | SDK oficial da API Gemini para orquestração de chat e Function Calling           |
+| **MCP SDK**                  | `tickets-tools`, `gemini-chat` | `^1.0.0`              | Implementação do protocolo Model Context Protocol (Server e Stdio Client)        |
+| **Next.js**                  | `gemini-chat`                  | `^14.2.0`             | Framework fullstack React com API Routes (App Router)                            |
+| **React**                    | `gemini-chat`                  | `^18.3.0`             | Biblioteca declarativa para construção de interfaces de usuário                  |
+| **Express**                  | `auth`                         | `^4.22.2`             | Framework HTTP para microsserviço de autenticação e gestão de limites            |
+| **better-sqlite3**           | `auth`, `tickets-tools`        | `^11.8.1`             | Driver síncrono e de alta performance para SQLite com suporte a transações e WAL |
+| **Zod**                      | `tickets-tools`                | `^3.23.8`             | Validação de schemas e contratos de entrada das ferramentas MCP                  |
+| **jsonwebtoken**             | `auth`                         | `^9.0.3`              | Emissão, assinatura e verificação de tokens JWT (RFC 7519)                       |
+| **Vitest**                   | Todos                          | `^2.0.0+` / `^4.1.11` | Suíte de testes unitários, testes de integração e testes adversariais            |
+| **Supertest**                | `auth`                         | `^7.2.2`              | Testes de integração HTTP para endpoints da API Express                          |
 
 ### Protocolos e Padroes
 
@@ -388,6 +390,8 @@ npm test
 ---
 
 ## Regras de Repositorio
+
+![Regras do Repositorio](docs/headers/agentic-payments-fde-workshops-secondaryheader-repositoryrules.webp)
 
 ### Estrategia de Branches
 
