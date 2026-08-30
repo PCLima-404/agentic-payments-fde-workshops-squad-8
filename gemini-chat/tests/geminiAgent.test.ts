@@ -184,11 +184,11 @@ describe("Orquestrador do Loop de Tool Calling (gemini-chat/src/services/geminiA
       );
       expect(mockGenerateContent).toHaveBeenCalledTimes(2);
 
-      // Valida que o histórico contém os 4 turnos: user -> model (call) -> function (response) -> model (texto)
+      // Valida que o histórico contém os 4 turnos: user -> model (call) -> user (response) -> model (texto)
       expect(resultado.historico.length).toBe(4);
       expect(resultado.historico[0].role).toBe("user");
       expect(resultado.historico[1].role).toBe("model");
-      expect(resultado.historico[2].role).toBe("function");
+      expect(resultado.historico[2].role).toBe("user");
       expect(resultado.historico[3].role).toBe("model");
     });
 
@@ -327,7 +327,9 @@ describe("Orquestrador do Loop de Tool Calling (gemini-chat/src/services/geminiA
       expect(resultado.resposta).toContain("instabilidade temporária");
 
       // Verifica que o functionResponse foi gerado com ERRO_INTERNO
-      const functionResponseTurn = resultado.historico.find((h) => h.role === "function");
+      const functionResponseTurn = resultado.historico.find((h) =>
+        h.parts?.some((p) => "functionResponse" in p)
+      );
       expect(functionResponseTurn).toBeDefined();
     });
 

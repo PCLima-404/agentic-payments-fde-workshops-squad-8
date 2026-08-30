@@ -79,6 +79,36 @@ export function normalizarHistorico(mensagens: MensagemEntrada[]): Content[] {
 }
 
 /**
+ * Executa a chamada generateContent com mecanismo de retry automático para lidar com picos temporários de alta demanda (503/429).
+ */
+async function gerarConteudoComRetry(
+  model: any,
+  contents: Content[],
+  maxTentativas = 3
+) {
+  let ultimaExcecao: unknown;
+  for (let tentativa = 1; tentativa <= maxTentativas; tentativa++) {
+    try {
+      return await model.generateContent({ contents });
+    } catch (erro: any) {
+      ultimaExcecao = erro;
+      const status = erro?.status;
+      const ehErroTemporario =
+        status === 503 ||
+        status === 429 ||
+        (erro?.message && (erro.message.includes("503") || erro.message.includes("high demand")));
+
+      if (ehErroTemporario && tentativa < maxTentativas) {
+        await new Promise((resolve) => setTimeout(resolve, 800 * tentativa));
+        continue;
+      }
+      throw erro;
+    }
+  }
+  throw ultimaExcecao;
+}
+
+/**
  * Executa o loop conversacional de Tool Calling com o Google Gemini.
  *
  * @param historicoEntrada - Lista de mensagens anteriores e a nova mensagem do usuário
@@ -107,7 +137,7 @@ export async function executarLoopAgente(
   const functionDeclarations = converterMcpParaGeminiDeclarations(toolsMcp);
 
   // 2. Configura o modelo GenerativeModel com System Instruction e Tools sanitizadas
-  const nomeModelo = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+  const nomeModelo = process.env.GEMINI_MODEL || "gemini-3.5-flash-lite";
   const model = genAI.getGenerativeModel({
     model: nomeModelo,
     systemInstruction: SYSTEM_INSTRUCTION_AGENTE,
@@ -122,9 +152,10 @@ export async function executarLoopAgente(
   while (iteracoes < maxIteracoes) {
     iteracoes++;
 
-    const resultadoGeracao = await model.generateContent({
-      contents: historicoAtual,
-    });
+    const resultadoGeracao = await gerarConteudoComRetry(
+      model,
+      historicoAtual
+    );
 
     const response = resultadoGeracao.response;
     const functionCalls =
@@ -135,23 +166,34 @@ export async function executarLoopAgente(
     // Se o modelo produziu resposta de texto sem requisições de ferramentas adicionais
     if (!functionCalls || functionCalls.length === 0) {
       respostaFinal = typeof response.text === "function" ? response.text() : "";
-      historicoAtual.push({
-        role: "model",
-        parts: [{ text: respostaFinal }],
-      });
+      const candidateContent = resultadoGeracao.response.candidates?.[0]?.content;
+      if (candidateContent && Array.isArray(candidateContent.parts)) {
+        historicoAtual.push(candidateContent);
+      } else {
+        historicoAtual.push({
+          role: "model",
+          parts: [{ text: respostaFinal }],
+        });
+      }
       break;
     }
 
     // Registra o turno do modelo contendo as chamadas de ferramentas no histórico
-    historicoAtual.push({
-      role: "model",
-      parts: functionCalls.map((call: FunctionCall) => ({
-        functionCall: {
-          name: call.name,
-          args: call.args,
-        },
-      })),
-    });
+    // Preserva o candidateContent completo gerado pelo modelo (incluindo metadados e assinaturas)
+    const candidateContent = resultadoGeracao.response.candidates?.[0]?.content;
+    if (candidateContent && Array.isArray(candidateContent.parts)) {
+      historicoAtual.push(candidateContent);
+    } else {
+      historicoAtual.push({
+        role: "model",
+        parts: functionCalls.map((call: FunctionCall) => ({
+          functionCall: {
+            name: call.name,
+            args: call.args,
+          },
+        })),
+      });
+    }
 
     // Executa cada ferramenta requerida de forma protegida via executor seguro
     const functionResponseParts: Part[] = [];
@@ -196,9 +238,9 @@ export async function executarLoopAgente(
       }
     }
 
-    // Registra as respostas das ferramentas (role: 'function') para a próxima iteração
+    // Registra as respostas das ferramentas (role: 'user' compatível com Gemini 3.5+)
     historicoAtual.push({
-      role: "function",
+      role: "user",
       parts: functionResponseParts,
     });
   }
