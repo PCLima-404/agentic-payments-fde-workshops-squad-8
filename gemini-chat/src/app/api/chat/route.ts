@@ -9,7 +9,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { executarLoopAgente } from "../../../services/geminiAgent";
-import { UsuarioSessao } from "../../../mcp/executor";
+import { UsuarioSessao, executarToolComSessao } from "../../../mcp/executor";
 
 /**
  * Decodifica e valida o payload de um token JWT sem dependência de módulos nativos externos.
@@ -59,12 +59,14 @@ export function extrairSessaoDoToken(token: string): UsuarioSessao | null {
  */
 export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
-    // 1. Extração e validação do Header de Autorização
     const authHeader = req.headers.get("authorization");
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return NextResponse.json(
-        { erro: "TOKEN_AUSENTE", mensagem: "Token de autenticação não fornecido." },
+        {
+          erro: "TOKEN_AUSENTE",
+          mensagem: "Token de autenticação não fornecido.",
+        },
         { status: 401 }
       );
     }
@@ -74,19 +76,63 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     if (!sessao) {
       return NextResponse.json(
-        { erro: "TOKEN_INVALIDO", mensagem: "Token JWT inválido ou expirado." },
+        {
+          erro: "TOKEN_INVALIDO",
+          mensagem: "Token JWT inválido ou expirado.",
+        },
         { status: 401 }
       );
     }
 
-    // 2. Validação do Corpo da Requisição
     let body: any;
     try {
       body = await req.json();
     } catch {
       return NextResponse.json(
-        { erro: "PAYLOAD_INVALIDO", mensagem: "Corpo da requisição deve ser um JSON válido." },
+        {
+          erro: "PAYLOAD_INVALIDO",
+          mensagem: "Corpo da requisição deve ser um JSON válido.",
+        },
         { status: 400 }
+      );
+    }
+
+    if (body?.toolCall?.name) {
+      const { toolCall, sessao: sessaoBody, tokenJwt } = body;
+
+      if (!sessaoBody?.usuarioId) {
+        return NextResponse.json(
+          { erro: "SESSAO_INVALIDA" },
+          { status: 401 }
+        );
+      }
+
+      if (!tokenJwt) {
+        return NextResponse.json(
+          { erro: "TOKEN_AUSENTE" },
+          { status: 401 }
+        );
+      }
+
+      const nomeDaTool = toolCall.name;
+      const argumentosDaTool = toolCall.arguments ?? {};
+
+      const resultado = await executarToolComSessao(
+        nomeDaTool,
+        argumentosDaTool,
+        {
+          id: sessaoBody.usuarioId,
+          username: sessaoBody.username,
+        },
+        tokenJwt
+      );
+
+      return NextResponse.json(
+        {
+          ok: true,
+          resultado,
+        },
+        { status: 200 }
       );
     }
 
@@ -100,7 +146,6 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       );
     }
 
-    // 3. Execução do Loop de Tool Calling
     const resultado = await executarLoopAgente(
       body.messages,
       sessao,
@@ -108,7 +153,6 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       body.maxIteracoes || 5
     );
 
-    // 4. Retorno de Sucesso
     return NextResponse.json(
       {
         resposta: resultado.resposta,

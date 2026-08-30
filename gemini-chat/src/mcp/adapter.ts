@@ -86,11 +86,11 @@ export function converterToolMcpParaGemini(
     (campo) => !CAMPOS_RESTRITOS_SESSAO.has(campo)
   );
 
-  const parameters: Schema = {
+  const parameters = {
     type: SchemaType.OBJECT,
-    properties: propertiesSanitizadas,
+    properties: propertiesSanitizadas as Record<string, any>,
     ...(requiredSanitizado.length > 0 ? { required: requiredSanitizado } : {}),
-  };
+  } satisfies NonNullable<FunctionDeclaration["parameters"]>;
 
   return {
     name: tool.name,
