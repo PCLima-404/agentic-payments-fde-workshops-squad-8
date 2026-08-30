@@ -22,7 +22,7 @@ describe("Orquestrador do Loop de Tool Calling (gemini-chat/src/services/geminiA
   beforeEach(() => {
     vi.restoreAllMocks();
 
-    // Mock padrão do MCP Client listando as 3 ferramentas
+    // Mock padrão do MCP Client listando as 3 ferramentas do servidor tickets-tools
     vi.spyOn(clientModule, "listarToolsDisponiveis").mockResolvedValue([
       {
         name: "listar_catalogo",
@@ -77,7 +77,16 @@ describe("Orquestrador do Loop de Tool Calling (gemini-chat/src/services/geminiA
       ]);
     });
 
-    it("deve preservar mensagens que já possuem parts", () => {
+    it("deve converter mensagens com role 'assistant' para 'model'", () => {
+      const entrada = [{ role: "assistant", text: "Mensagem do assistente" }];
+      const resultado = normalizarHistorico(entrada);
+
+      expect(resultado).toEqual([
+        { role: "model", parts: [{ text: "Mensagem do assistente" }] },
+      ]);
+    });
+
+    it("deve preservar mensagens que já possuem a estrutura Content com parts", () => {
       const entrada = [
         { role: "user", parts: [{ text: "Mensagem pronta" }] },
       ];
@@ -85,9 +94,14 @@ describe("Orquestrador do Loop de Tool Calling (gemini-chat/src/services/geminiA
       const resultado = normalizarHistorico(entrada);
       expect(resultado).toEqual(entrada);
     });
+
+    it("deve retornar array vazio para entradas nulas ou indefinidas", () => {
+      expect(normalizarHistorico(null as unknown as [])).toEqual([]);
+      expect(normalizarHistorico(undefined as unknown as [])).toEqual([]);
+    });
   });
 
-  describe("Execução do Loop de Tool Calling", () => {
+  describe("Execução do Loop de Tool Calling (Fluxos Principais)", () => {
     it("deve processar resposta direta de texto sem invocar tools (0 tool calls)", async () => {
       const mockGenerateContent = vi.fn().mockResolvedValue({
         response: {
@@ -178,7 +192,62 @@ describe("Orquestrador do Loop de Tool Calling (gemini-chat/src/services/geminiA
       expect(resultado.historico[3].role).toBe("model");
     });
 
-    it("deve lidar com erros de negócio retornados pelas tools (status: recusado)", async () => {
+    it("deve processar registro de intenção de compra encadeada e explicar valores ao usuário", async () => {
+      const spyExecutor = vi
+        .spyOn(executorModule, "executarToolComSessao")
+        .mockResolvedValue({
+          intencaoId: "int_abc123",
+          produtoId: "evt_001",
+          quantidade: 2,
+          valorTotal: 240.0,
+          moeda: "BRL",
+          status: "pendente",
+          expiraEm: "2026-08-30T17:00:00.000Z",
+        });
+
+      const mockGenerateContent = vi
+        .fn()
+        .mockResolvedValueOnce({
+          response: {
+            functionCalls: () => [
+              { name: "registrar_intencao", args: { evento_id: "evt_001", quantidade: 2 } },
+            ],
+            text: () => "",
+          },
+        })
+        .mockResolvedValueOnce({
+          response: {
+            functionCalls: () => undefined,
+            text: () => "Reservei 2 ingressos por R$ 240,00 no total. Você deseja pagar com cartão ou pix?",
+          },
+        });
+
+      const mockModel = { generateContent: mockGenerateContent };
+      const mockGenAI = {
+        getGenerativeModel: vi.fn().mockReturnValue(mockModel),
+      } as unknown as GoogleGenerativeAI;
+
+      const resultado = await executarLoopAgente(
+        [{ role: "user", content: "Quero 2 ingressos para o evento evt_001." }],
+        sessaoMock,
+        tokenJwtMock,
+        5,
+        mockGenAI
+      );
+
+      expect(resultado.iteracoes).toBe(2);
+      expect(spyExecutor).toHaveBeenCalledWith(
+        "registrar_intencao",
+        { evento_id: "evt_001", quantidade: 2 },
+        sessaoMock,
+        tokenJwtMock
+      );
+      expect(resultado.resposta).toContain("R$ 240,00");
+    });
+  });
+
+  describe("Tratamento de Erros e Casos Adversariais no Loop", () => {
+    it("deve lidar com erros de negócio retornados pelas tools (status: recusado / LIMITE_EXCEDIDO)", async () => {
       vi.spyOn(executorModule, "executarToolComSessao").mockResolvedValue({
         status: "recusado",
         erro: "LIMITE_EXCEDIDO",
@@ -219,12 +288,55 @@ describe("Orquestrador do Loop de Tool Calling (gemini-chat/src/services/geminiA
       expect(resultado.resposta).toContain("limite disponível");
     });
 
+    it("deve capturar falhas de execução de ferramenta e injetar ERRO_INTERNO no functionResponse", async () => {
+      vi.spyOn(executorModule, "executarToolComSessao").mockRejectedValue(
+        new Error("Conexão com subprocesso MCP falhou.")
+      );
+
+      const mockGenerateContent = vi
+        .fn()
+        .mockResolvedValueOnce({
+          response: {
+            functionCalls: () => [
+              { name: "listar_catalogo", args: {} },
+            ],
+            text: () => "",
+          },
+        })
+        .mockResolvedValueOnce({
+          response: {
+            functionCalls: () => undefined,
+            text: () => "Tivemos uma instabilidade temporária ao consultar os eventos. Por favor, tente novamente.",
+          },
+        });
+
+      const mockModel = { generateContent: mockGenerateContent };
+      const mockGenAI = {
+        getGenerativeModel: vi.fn().mockReturnValue(mockModel),
+      } as unknown as GoogleGenerativeAI;
+
+      const resultado = await executarLoopAgente(
+        [{ role: "user", content: "Listar eventos" }],
+        sessaoMock,
+        tokenJwtMock,
+        5,
+        mockGenAI
+      );
+
+      expect(resultado.iteracoes).toBe(2);
+      expect(resultado.resposta).toContain("instabilidade temporária");
+
+      // Verifica que o functionResponse foi gerado com ERRO_INTERNO
+      const functionResponseTurn = resultado.historico.find((h) => h.role === "function");
+      expect(functionResponseTurn).toBeDefined();
+    });
+
     it("deve interromper o loop com segurança caso o limite de iterações seja atingido (prevenção de loop infinito)", async () => {
       vi.spyOn(executorModule, "executarToolComSessao").mockResolvedValue({
         produtos: [],
       });
 
-      // Simula um modelo em loop infinito que sempre retorna functionCall sem texto
+      // Simula um modelo em loop infinito que sempre retorna functionCall sem texto final
       const mockGenerateContent = vi.fn().mockResolvedValue({
         response: {
           functionCalls: () => [{ name: "listar_catalogo", args: {} }],
@@ -251,11 +363,19 @@ describe("Orquestrador do Loop de Tool Calling (gemini-chat/src/services/geminiA
       expect(resultado.resposta).toContain("Não foi possível concluir");
     });
 
-    it("deve rejeitar a execução se a sessão do usuário for inválida", async () => {
+    it("deve rejeitar a execução se a sessão do usuário for inválida ou não possuir id", async () => {
       await expect(
         executarLoopAgente(
           [{ role: "user", content: "Olá" }],
           { id: "" } as UsuarioSessao,
+          tokenJwtMock
+        )
+      ).rejects.toThrow(/Sessão inválida/);
+
+      await expect(
+        executarLoopAgente(
+          [{ role: "user", content: "Olá" }],
+          null as unknown as UsuarioSessao,
           tokenJwtMock
         )
       ).rejects.toThrow(/Sessão inválida/);

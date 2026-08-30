@@ -167,6 +167,9 @@ describe("Endpoint HTTP /api/chat (gemini-chat/src/app/api/chat/route.ts)", () =
     });
 
     it("deve retornar 500 ERRO_INTERNO caso o orquestrador lance uma exceção não tratada", async () => {
+      // Silencia a saída de console.error esperada para este cenário de teste de falha
+      vi.spyOn(console, "error").mockImplementation(() => { });
+
       const tokenValido = criarTokenJwtMock({
         sub: "usr_pedro_001",
         username: "pedro",
