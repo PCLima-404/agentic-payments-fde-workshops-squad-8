@@ -84,6 +84,22 @@ describe("Endpoint HTTP /api/chat (gemini-chat/src/app/api/chat/route.ts)", () =
       expect(json.erro).toBe("TOKEN_AUSENTE");
     });
 
+    it("deve retornar 401 TOKEN_AUSENTE quando o header Authorization não utilizar o prefixo Bearer", async () => {
+      const req = new NextRequest("http://localhost:3000/api/chat", {
+        method: "POST",
+        headers: {
+          Authorization: "Basic dXN1YXJpbzpzZW5oYQ==",
+        },
+        body: JSON.stringify({ messages: [{ role: "user", content: "Olá" }] }),
+      });
+
+      const res = await POST(req);
+      expect(res.status).toBe(401);
+
+      const json = await res.json();
+      expect(json.erro).toBe("TOKEN_AUSENTE");
+    });
+
     it("deve retornar 401 TOKEN_INVALIDO quando o token JWT for forjado ou inválido", async () => {
       const req = new NextRequest("http://localhost:3000/api/chat", {
         method: "POST",
@@ -98,6 +114,27 @@ describe("Endpoint HTTP /api/chat (gemini-chat/src/app/api/chat/route.ts)", () =
 
       const json = await res.json();
       expect(json.erro).toBe("TOKEN_INVALIDO");
+    });
+
+    it("deve retornar 400 PAYLOAD_INVALIDO quando o corpo não for um JSON válido", async () => {
+      const tokenValido = criarTokenJwtMock({
+        sub: "usr_001",
+        username: "pedro",
+      });
+
+      const req = new NextRequest("http://localhost:3000/api/chat", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${tokenValido}`,
+        },
+        body: "isto_nao_e_um_json",
+      });
+
+      const res = await POST(req);
+      expect(res.status).toBe(400);
+
+      const json = await res.json();
+      expect(json.erro).toBe("PAYLOAD_INVALIDO");
     });
 
     it("deve retornar 400 PAYLOAD_INVALIDO quando o campo messages for omitido ou vazio", async () => {
@@ -166,9 +203,45 @@ describe("Endpoint HTTP /api/chat (gemini-chat/src/app/api/chat/route.ts)", () =
       );
     });
 
+    it("deve repassar maxIteracoes customizado quando fornecido no corpo da requisição", async () => {
+      const tokenValido = criarTokenJwtMock({
+        sub: "usr_pedro_001",
+        username: "pedro",
+      });
+
+      const spyExecutarLoop = vi
+        .spyOn(agentModule, "executarLoopAgente")
+        .mockResolvedValue({
+          resposta: "Resposta com limite 3.",
+          historico: [],
+          iteracoes: 2,
+        });
+
+      const req = new NextRequest("http://localhost:3000/api/chat", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${tokenValido}`,
+        },
+        body: JSON.stringify({
+          messages: [{ role: "user", content: "Teste limite customizado" }],
+          maxIteracoes: 3,
+        }),
+      });
+
+      const res = await POST(req);
+      expect(res.status).toBe(200);
+
+      expect(spyExecutarLoop).toHaveBeenCalledWith(
+        [{ role: "user", content: "Teste limite customizado" }],
+        { id: "usr_pedro_001", username: "pedro" },
+        tokenValido,
+        3
+      );
+    });
+
     it("deve retornar 500 ERRO_INTERNO caso o orquestrador lance uma exceção não tratada", async () => {
       // Silencia a saída de console.error esperada para este cenário de teste de falha
-      vi.spyOn(console, "error").mockImplementation(() => { });
+      vi.spyOn(console, "error").mockImplementation(() => {});
 
       const tokenValido = criarTokenJwtMock({
         sub: "usr_pedro_001",

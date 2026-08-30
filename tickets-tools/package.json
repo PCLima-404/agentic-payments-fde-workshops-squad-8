@@ -6,7 +6,7 @@
     "dev": "ts-node-dev src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
-    "test": "vitest run",
+    "test": "vitest run --fileParallelism=false",
     "db:seed": "ts-node src/db/seed.ts"
   },
   "dependencies": {
