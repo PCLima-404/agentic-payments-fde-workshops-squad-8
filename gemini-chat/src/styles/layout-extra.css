@@ -1,0 +1,36 @@
+/* gemini-chat/src/styles/layout-extra.css
+   Só estrutura de posicionamento de página inteira — nenhuma cor aqui.
+   Todo valor de cor vem exclusivamente de components.css/tokens.css. */
+
+.ig-tela-login {
+  display: flex;
+  min-height: 100vh;
+}
+
+.ig-tela-login .ig-marca-painel {
+  flex: 1;
+}
+
+.ig-tela-login__form-col {
+  width: 420px;
+  padding: var(--e-8);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.ig-tela-carregando {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--e-6);
+}
+
+.ig-tela-falha {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--e-6);
+}

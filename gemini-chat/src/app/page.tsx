@@ -31,5 +31,5 @@ export default function HomePage() {
     return <LoadingScreen onConcluido={() => setPronto(true)} />;
   }
 
-  return <ChatWindow token={token} usuario={usuario} onUsuarioAtualizado={setUsuario} />;
+  return <ChatWindow token={token} usuarioInicial={usuario} />;
 }
