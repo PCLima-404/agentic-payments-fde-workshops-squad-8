@@ -37,6 +37,12 @@ Documento normativo de tipos, payloads, codigos de erro e diretrizes de prompt p
 
 - [9. Tratamento de Erro em Linguagem Natural](#9-tratamento-de-erro-em-linguagem-natural)
 
+- [10. Frontend: Design System e Telas](#10-frontend-design-system-e-telas)
+
+- [11. Rota de Registro (POST /registrar)](#14-rota-de-registro-post-registrar)
+
+- [12. CORS](#15-cors)
+
 ---
 
 ## 1. Visao Geral
@@ -321,3 +327,32 @@ entre os módulos do projeto.
 A função auxiliar `ehErroTool` permite ao loop de tool calling (ver
 próximo card) distinguir um retorno de sucesso de um `ErroTool`, sem
 depender de checagens frágeis por formato de string.
+
+## 10. Frontend: Design System e Telas
+
+Implementado em `gemini-chat/src/`, seguindo o guia de design fornecido.
+Telas: LoginForm, LoadingScreen, ChatWindow + OrderPanel, SystemFailureScreen.
+
+Limitações conhecidas: catálogo sem campos de data/local; ToolCallBadge
+reaproposto como indicador neutro (sem expor qual tool foi chamada).
+
+## 11. Rota de Registro (POST /registrar)
+
+Permite criar uma nova conta diretamente pela tela de login, sem depender do
+seed manual do banco. Retorna JWT já válido (login automático pós-cadastro).
+
+**Body:** `{ username: string, senha: string }`
+
+**Respostas:**
+
+- `201 { token: string }` — usuário criado com sucesso
+- `400 { erro: "DADOS_INVALIDOS" }` — username ou senha ausentes
+- `409 { erro: "USUARIO_JA_EXISTE" }` — username já cadastrado
+
+Todo usuário criado por essa rota começa com `limiteGasto = 500.00`.
+
+## 12. CORS
+
+O serviço `auth` habilita CORS irrestrito (`app.use(cors())`) para permitir
+chamadas do frontend em `localhost:3000` durante o desenvolvimento. Ajustar
+a allowlist de origem antes de qualquer deploy real.
