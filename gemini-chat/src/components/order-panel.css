@@ -1,0 +1,112 @@
+.painel-pedido {
+  width: 300px;
+  padding: var(--espaco-4);
+  border-left: var(--borda);
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-3);
+}
+
+.bloco-disponivel {
+  background: var(--tom-show);
+  padding: var(--espaco-3);
+}
+
+.valor-disponivel {
+  font-size: var(--texto-valor);
+  font-weight: 600;
+  margin: 0;
+}
+
+.rotulo {
+  font-size: var(--texto-rotulo);
+  font-weight: 500;
+  color: rgba(18, 18, 20, 0.6);
+  margin: 0 0 4px;
+}
+
+.mensagem-vazia {
+  font-size: var(--texto-corpo);
+  color: rgba(18, 18, 20, 0.5);
+}
+
+.faixa-resultado {
+  border-left: var(--faixa-enfase) solid;
+  padding: var(--espaco-3);
+}
+
+.faixa-aprovado {
+  background: var(--tom-teatro);
+  border-color: var(--cor-aprovado);
+}
+
+.faixa-bloqueio {
+  background: var(--tom-esporte);
+  border-color: var(--cor-bloqueio);
+}
+
+.titulo-resultado {
+  font-weight: 600;
+  margin: 0 0 4px;
+}
+
+.texto-resultado {
+  font-size: var(--texto-corpo);
+  margin: 0;
+}
+
+.trio-numeros {
+  display: flex;
+  gap: var(--espaco-4);
+  margin-top: var(--espaco-2);
+}
+
+.cartao-evento {
+  background: var(--cor-acao);
+  color: #fff;
+  padding: var(--espaco-3);
+}
+
+.nome-evento {
+  font-weight: 600;
+  margin: 0;
+}
+
+.linha-quantidade,
+.linha-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.texto-total {
+  font-size: var(--texto-total);
+  font-weight: 600;
+}
+
+.aviso-neutro {
+  background: var(--tom-festival);
+  padding: var(--espaco-2);
+  font-size: var(--texto-apoio);
+  margin: 0;
+}
+
+.botao-primario,
+.botao-secundario {
+  height: 52px;
+  border-radius: var(--raio);
+  font-size: var(--texto-subtitulo);
+  font-weight: 600;
+}
+
+.botao-primario {
+  background: var(--cor-acao);
+  color: #fff;
+  border: none;
+}
+
+.botao-secundario {
+  background: #fff;
+  color: var(--cor-tinta);
+  border: var(--borda);
+}

@@ -1,0 +1,61 @@
+.linha-mensagem {
+  display: flex;
+  margin-bottom: var(--espaco-2);
+}
+
+.do-usuario {
+  justify-content: flex-end;
+}
+
+.do-agente {
+  justify-content: flex-start;
+}
+
+.bolha {
+  max-width: 70%;
+  padding: var(--espaco-2) var(--espaco-3);
+  font-size: var(--texto-corpo);
+  line-height: 1.5;
+}
+
+.bolha-usuario {
+  background: var(--cor-tinta);
+  color: #fff;
+}
+
+.bolha-agente {
+  background: #fff;
+  border: var(--borda);
+}
+
+.bolha-carregando {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.ponto {
+  width: 6px;
+  height: 6px;
+  background: rgba(18, 18, 20, 0.35);
+  border-radius: 50%;
+  animation: pulsar 1s infinite ease-in-out;
+}
+
+.ponto:nth-child(2) {
+  animation-delay: 0.15s;
+}
+.ponto:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes pulsar {
+  0%,
+  80%,
+  100% {
+    opacity: 0.3;
+  }
+  40% {
+    opacity: 1;
+  }
+}

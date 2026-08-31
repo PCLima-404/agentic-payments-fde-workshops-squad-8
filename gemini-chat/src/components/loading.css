@@ -1,0 +1,91 @@
+.tela-carregando {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: var(--espaco-5);
+}
+
+.blocos-progresso {
+  display: flex;
+  gap: var(--espaco-1);
+  margin-bottom: var(--espaco-4);
+}
+
+.bloco {
+  height: 4px;
+  flex: 1;
+  background: var(--tom-selecao);
+}
+
+.bloco.concluido {
+  background: var(--cor-acao);
+}
+
+.titulo-carregando {
+  font-size: var(--texto-titulo);
+  font-weight: 600;
+  margin: 0 0 var(--espaco-1);
+}
+
+.subtitulo-carregando {
+  color: rgba(18, 18, 20, 0.6);
+  font-size: var(--texto-corpo);
+  margin: 0 0 var(--espaco-4);
+}
+
+.lista-etapas {
+  list-style: none;
+  margin: 0 0 var(--espaco-4);
+  padding: 0;
+  border: var(--borda);
+}
+
+.etapa {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-2);
+  padding: var(--espaco-3) var(--espaco-3);
+  border-bottom: var(--borda);
+}
+
+.etapa:last-child {
+  border-bottom: none;
+}
+
+.etapa.em-curso {
+  background: var(--tom-show);
+}
+
+.marcador {
+  width: 8px;
+  height: 8px;
+  background: rgba(18, 18, 20, 0.2);
+}
+
+.marcador.pronto {
+  background: var(--cor-aprovado);
+}
+
+.marcador.curso {
+  background: var(--cor-atencao);
+}
+
+.texto-etapa {
+  flex: 1;
+  font-size: var(--texto-corpo);
+}
+
+.status-etapa {
+  font-size: var(--texto-apoio);
+  color: rgba(18, 18, 20, 0.5);
+}
+
+.barra-progresso {
+  height: 6px;
+  background: var(--tom-selecao);
+}
+
+.barra-preenchida {
+  height: 100%;
+  background: var(--cor-acao);
+  transition: width 0.4s ease;
+}

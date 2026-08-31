@@ -1,0 +1,52 @@
+:root {
+  --cor-acao: #2a4fd8;
+  --cor-aprovado: #157a47;
+  --cor-bloqueio: #c7402b;
+  --cor-atencao: #c98a00;
+  --cor-tinta: #121214;
+  --cor-papel: #f7f6f2;
+
+  --tom-selecao: #edf0fc;
+  --tom-teatro: #e3f0e8;
+  --tom-show: #fbf0d8;
+  --tom-esporte: #fbe7e2;
+  --tom-festival: #f1ede4;
+
+  --espaco-1: 4px;
+  --espaco-2: 8px;
+  --espaco-3: 12px;
+  --espaco-4: 20px;
+  --espaco-5: 32px;
+
+  --raio: 0;
+  --borda: 1px solid rgba(18, 18, 20, 0.14);
+  --faixa-enfase: 3px;
+
+  --fonte: "Space Grotesk", system-ui, sans-serif;
+
+  --texto-hero: 52px;
+  --texto-titulo: 36px;
+  --texto-titulo-form: 32px;
+  --texto-valor: 26px;
+  --texto-total: 20px;
+  --texto-subtitulo: 16px;
+  --texto-corpo: 14px;
+  --texto-rotulo: 13px;
+  --texto-apoio: 12px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--fonte);
+  color: var(--cor-tinta);
+  background: var(--cor-papel);
+}
+
+button {
+  font-family: var(--fonte);
+  cursor: pointer;
+}

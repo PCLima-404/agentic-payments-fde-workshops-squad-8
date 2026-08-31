@@ -1,0 +1,51 @@
+/* gemini-chat/src/components/system-failure.css */
+.tela-falha {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--espaco-5);
+}
+
+.conteudo-falha {
+  max-width: 480px;
+  text-align: center;
+}
+
+.texto-falha {
+  font-size: var(--texto-subtitulo);
+  line-height: 1.6;
+  margin-bottom: var(--espaco-4);
+}
+
+.acoes-falha {
+  display: flex;
+  gap: var(--espaco-2);
+  justify-content: center;
+  margin-bottom: var(--espaco-4);
+}
+
+.acoes-falha .botao-primario,
+.acoes-falha .botao-secundario {
+  height: 52px;
+  padding: 0 var(--espaco-4);
+  font-size: var(--texto-subtitulo);
+  font-weight: 600;
+  border-radius: var(--raio);
+}
+
+.acoes-falha .botao-primario {
+  background: var(--cor-acao);
+  color: #fff;
+  border: none;
+}
+
+.acoes-falha .botao-secundario {
+  background: #fff;
+  border: var(--borda);
+}
+
+.nota-falha {
+  font-size: var(--texto-apoio);
+  color: rgba(18, 18, 20, 0.5);
+}
