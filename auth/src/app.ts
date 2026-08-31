@@ -3,27 +3,33 @@
 //
 // Rotas disponíveis:
 //   POST /login                — autentica usuario/senha e retorna JWT
+//   POST /registrar            — cria um novo usuario e retorna JWT
 //   GET  /me                   — retorna dados do usuario autenticado (inclui limiteGasto)
 //   PATCH /me/limite           — debita valor do limite de gasto do usuario autenticado
 //   GET  /chat-stub            — stub de validacao do middleware (uso interno/testes)
 
+import { randomUUID } from "crypto";
+import cors from "cors";
 import express from "express";
 import {
   buscarUsuarioPorUsername,
   buscarUsuarioPorId,
   debitarLimiteUsuario,
+  criarUsuario,
 } from "./data/usuarios";
-import { verificarSenha } from "./utils/senha";
+import { verificarSenha, gerarHashSenha } from "./utils/senha";
 import { gerarToken } from "./utils/token";
 import { autenticar } from "./middleware/auth.middleware";
 
 const app = express();
+app.use(cors());
 app.use(express.json());
 
 // POST /login
 // Autentica com username e senha. Retorna JWT valido por 2 horas.
 app.post("/login", (req, res) => {
   const { username, senha } = req.body;
+
   const usuario = buscarUsuarioPorUsername(username);
 
   if (!usuario || !verificarSenha(senha, usuario.senhaHash)) {
@@ -34,12 +40,54 @@ app.post("/login", (req, res) => {
   res.json({ token });
 });
 
+// POST /registrar
+// Cria um novo usuario com limite de gasto padrao (R$ 500,00).
+// Retorna JWT ja valido, permitindo login automatico apos o cadastro.
+//
+// Body esperado: { username: string, senha: string }
+//
+// Respostas:
+//   201 { token: string }                  — usuario criado com sucesso
+//   400 { erro: "DADOS_INVALIDOS" }         — username ou senha ausentes
+//   409 { erro: "USUARIO_JA_EXISTE" }       — username ja cadastrado
+app.post("/registrar", (req, res) => {
+  const { username, senha } = req.body;
+
+  if (!username || !senha) {
+    return res.status(400).json({
+      erro: "DADOS_INVALIDOS",
+      mensagem: "Usuário e senha são obrigatórios.",
+    });
+  }
+
+  const existente = buscarUsuarioPorUsername(username);
+  if (existente) {
+    return res.status(409).json({
+      erro: "USUARIO_JA_EXISTE",
+      mensagem: "Esse nome de usuário já está em uso.",
+    });
+  }
+
+  const novoUsuario = {
+    id: `usr_${randomUUID()}`,
+    username,
+    senhaHash: gerarHashSenha(senha),
+    limiteGasto: 500.0,
+  };
+
+  criarUsuario(novoUsuario);
+
+  const token = gerarToken(novoUsuario.id, novoUsuario.username);
+  res.status(201).json({ token });
+});
+
 // GET /me
 // Retorna os dados publicos do usuario autenticado, incluindo o limiteGasto atual.
 // Consumido pelo tickets-tools via obterLimiteUsuario() para validar LIMITE_EXCEDIDO.
 app.get("/me", autenticar, (req, res) => {
   const { username } = (req as any).usuario;
   const usuario = buscarUsuarioPorUsername(username);
+
   res.json({
     id: usuario?.id,
     username: usuario?.username,
