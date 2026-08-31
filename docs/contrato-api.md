@@ -39,9 +39,11 @@ Documento normativo de tipos, payloads, codigos de erro e diretrizes de prompt p
 
 - [10. Frontend: Design System e Telas](#10-frontend-design-system-e-telas)
 
-- [11. Rota de Registro (POST /registrar)](#14-rota-de-registro-post-registrar)
+- [11. Rota de Registro (POST /registrar)](#11-rota-de-registro-post-registrar)
 
-- [12. CORS](#15-cors)
+- [12. CORS](#12-cors)
+
+- [13. Design System Oficial e Correção do Saldo](#13-Design System Oficial e Correção do Saldo)
 
 ---
 
@@ -356,3 +358,22 @@ Todo usuário criado por essa rota começa com `limiteGasto = 500.00`.
 O serviço `auth` habilita CORS irrestrito (`app.use(cors())`) para permitir
 chamadas do frontend em `localhost:3000` durante o desenvolvimento. Ajustar
 a allowlist de origem antes de qualquer deploy real.
+
+## 13. Design System Oficial e Correção do Saldo
+
+Frontend migrado para o design system oficial em
+`gemini-chat/src/styles/tokens.css` e `components.css` (prefixo `ig-`).
+Vocabulário alinhado com `docs/design/vocabulario.md`.
+
+**Bug corrigido:** o saldo (`limiteGasto`) ficava desatualizado até
+recarregar a página, porque era buscado uma única vez no carregamento.
+Agora `ChatWindow` busca o perfil de novo após cada turno da conversa.
+
+**Limitações conhecidas:**
+
+- Barra de consumo do saldo (`.ig-barra`) omitida: falta um campo de
+  "limite total" no backend para calcular o percentual usado.
+- Botão "Falar com uma pessoa" (do wireframe) não implementado: não
+  existe sistema de atendimento humano no escopo atual.
+- Cartões de evento (`.ig-eventos`/`.ig-evento`) ainda não renderizados
+  dentro da conversa — hoje o agente responde só em texto corrido.

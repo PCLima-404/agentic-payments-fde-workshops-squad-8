@@ -1,9 +1,7 @@
-// gemini-chat/src/components/LoginForm.tsx
 "use client";
 
 import { useState } from "react";
 import { login, registrar } from "../services/api";
-import "./login.css";
 
 const CATEGORIAS = ["show", "teatro", "festival", "esporte"];
 
@@ -13,7 +11,7 @@ interface LoginFormProps {
 
 export default function LoginForm({ onSucesso }: LoginFormProps) {
   const [modo, setModo] = useState<"login" | "cadastro">("login");
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [mostrarSenha, setMostrarSenha] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
@@ -26,8 +24,8 @@ export default function LoginForm({ onSucesso }: LoginFormProps) {
     try {
       const token =
         modo === "login"
-          ? await login(username, senha)
-          : await registrar(username, senha);
+          ? await login(email, senha)
+          : await registrar(email, senha);
       onSucesso(token);
     } catch (err) {
       setErro(
@@ -48,70 +46,86 @@ export default function LoginForm({ onSucesso }: LoginFormProps) {
   }
 
   return (
-    <div className="tela-login">
-      <div className="painel-marca">
-        <span className="selo-marca">Ingressos</span>
-        <h1 className="frase-marca">
+    <div className="ig-tela-login">
+      <div className="ig-marca-painel">
+        <div className="ig-quadro-marca" />
+        <p className="ig-marca-painel__chamada">
           Fale o que você quer ver. A gente resolve o resto.
-        </h1>
-        <div className="chips-categorias">
+        </p>
+        <div
+          className="ig-escrita__atalhos"
+          style={{ marginTop: "var(--e-5)" }}
+        >
           {CATEGORIAS.map((c) => (
-            <span key={c} className="chip">
+            <span key={c} className="ig-chip">
               {c}
             </span>
           ))}
         </div>
       </div>
 
-      <div className="painel-form">
-        <h2 className="titulo-form">
+      <div className="ig-tela-login__form-col">
+        <h2
+          style={{
+            font: "var(--t-t3)",
+            letterSpacing: "var(--track-titulo)",
+            margin: 0,
+          }}
+        >
           {modo === "login" ? "Entrar na sua conta" : "Criar sua conta"}
         </h2>
-        <p className="subtitulo-form">
+        <p
+          style={{
+            font: "var(--t-corpo)",
+            color: "var(--c-acao)",
+            marginTop: "var(--e-2)",
+            marginBottom: "var(--e-6)",
+          }}
+        >
           {modo === "login"
             ? "Seu valor disponível já vem configurado na conta."
             : "Sua conta já começa com R$ 500,00 disponíveis para gastar."}
         </p>
 
-        <form onSubmit={handleSubmit}>
-          <label className="rotulo" htmlFor="username">
-            Usuário
+        <form className="ig-form" onSubmit={handleSubmit}>
+          <label>
+            <div className="ig-campo__rotulo">
+              <span>Usuário</span>
+            </div>
+            <input
+              className="ig-campo__entrada"
+              type="text"
+              placeholder="ex: pedro"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
           </label>
-          <input
-            id="username"
-            type="text"
-            placeholder="ex: pedro"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-          />
 
-          <div className="linha-rotulo">
-            <label className="rotulo" htmlFor="senha">
-              Senha
-            </label>
-            <button
-              type="button"
-              className="link-discreto"
-              onClick={() => setMostrarSenha((v) => !v)}
-            >
-              {mostrarSenha ? "Ocultar" : "Mostrar"}
-            </button>
-          </div>
-          <input
-            id="senha"
-            type={mostrarSenha ? "text" : "password"}
-            placeholder="••••••••"
-            value={senha}
-            onChange={(e) => setSenha(e.target.value)}
-            required
-          />
-
-          {erro && <p className="mensagem-erro">{erro}</p>}
+          <label>
+            <div className="ig-campo__rotulo">
+              <span>Senha</span>
+              <span
+                className="ig-campo__acao"
+                onClick={() => setMostrarSenha((v) => !v)}
+              >
+                {mostrarSenha ? "Ocultar" : "Mostrar"}
+              </span>
+            </div>
+            <input
+              className="ig-campo__entrada"
+              type={mostrarSenha ? "text" : "password"}
+              placeholder="••••••••"
+              value={senha}
+              onChange={(e) => setSenha(e.target.value)}
+              required
+            />
+            {erro && <p className="ig-campo__erro">{erro}</p>}
+          </label>
 
           <button
             type="submit"
-            className="botao-primario"
+            className="ig-botao ig-botao--principal ig-botao--bloco"
             disabled={carregando}
           >
             {carregando
@@ -124,15 +138,21 @@ export default function LoginForm({ onSucesso }: LoginFormProps) {
           </button>
         </form>
 
-        <p className="alternar-modo">
+        <p
+          style={{
+            font: "var(--t-corpo)",
+            textAlign: "center",
+            marginTop: "var(--e-4)",
+          }}
+        >
           {modo === "login" ? "Ainda não tem conta?" : "Já tem conta?"}{" "}
-          <button
-            type="button"
-            className="link-discreto"
+          <span
+            className="ig-campo__acao"
             onClick={alternarModo}
+            style={{ cursor: "pointer" }}
           >
             {modo === "login" ? "Criar conta" : "Entrar"}
-          </button>
+          </span>
         </p>
       </div>
     </div>
