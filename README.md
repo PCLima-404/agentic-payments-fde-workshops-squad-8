@@ -14,7 +14,7 @@
 ![MCP](https://img.shields.io/badge/protocolo-MCP%201.0-8B5CF6?style=flat-square)
 ![Next.js](https://img.shields.io/badge/frontend-Next.js%2014-000000?style=flat-square&logo=nextdotjs&logoColor=white)
 ![Express](https://img.shields.io/badge/backend-Express%204.22-000000?style=flat-square&logo=express&logoColor=white)
-![SQLite](https://img.shields.io/badge/banco-SQLite%20(WAL)-003B57?style=flat-square&logo=sqlite&logoColor=white)
+![SQLite](<https://img.shields.io/badge/banco-SQLite%20(WAL)-003B57?style=flat-square&logo=sqlite&logoColor=white>)
 ![Vitest](https://img.shields.io/badge/testes-Vitest-6E9F18?style=flat-square&logo=vitest&logoColor=white)
 ![Licenca](https://img.shields.io/badge/licen%C3%A7a-privado-red?style=flat-square)
 
@@ -70,11 +70,11 @@
 O projeto implementa uma arquitetura local de **Pagamentos Agênticos** orientada a ferramentas, separando de forma estrita o plano de raciocínio da IA do plano de execução financeira e controle de estoque.
 
 | Atributo                | Valor                                                                                                                                                             |
-| -------------------------| -------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Contexto**            | Projeto de finalizacao: UOL / Agentic Payments e hand-off para a fase 2                                                                                           |
 | **Squad**               | Squad 8                                                                                                                                                           |
 | **Branch de entrega**   | `main`                                                                                                                                                            |
-| **Convenções**          | Commits Semânticos (Conventional Commits), Gitflow adaptado (prod, stage, dev, feature/*, fix/*, documentation/*)                                                 |
+| **Convenções**          | Commits Semânticos (Conventional Commits), Gitflow adaptado (prod, stage, dev, feature/_, fix/_, documentation/\*)                                                |
 | **Paradigma principal** | LLM com Function Calling (Tool Calling), injeção segura de credenciais no backend (Shielding Layer), persistência transacional com SQLite e auditoria estruturada |
 | **Protocolo de tools**  | Model Context Protocol (MCP 1.0) via Stdio Transport                                                                                                              |
 | **LLM utilizado**       | Google Gemini (gemini-2.5-flash / gemini-1.5-flash via `@google/generative-ai`)                                                                                   |
@@ -168,7 +168,7 @@ O projeto implementa uma arquitetura local de **Pagamentos Agênticos** orientad
 ### Stack Tecnica
 
 | Tecnologia                   | Modulo(s)                      | Versao                | Finalidade                                                                       |
-| ------------------------------| --------------------------------| -----------------------| ----------------------------------------------------------------------------------|
+| ---------------------------- | ------------------------------ | --------------------- | -------------------------------------------------------------------------------- |
 | **Node.js**                  | Todos                          | `^20.14.0+`           | Runtime JavaScript assíncrono                                                    |
 | **TypeScript**               | Todos                          | `^5.5.4+`             | Tipagem estática, interfaces e contratos de domínio                              |
 | **Google Generative AI SDK** | `gemini-chat`                  | `^0.19.0`             | SDK oficial da API Gemini para orquestração de chat e Function Calling           |
@@ -203,44 +203,46 @@ O projeto implementa uma arquitetura local de **Pagamentos Agênticos** orientad
 
 ## Modulos
 
-| Modulo            | Pasta            | Descricao                                                                                               |
-| ----------------- | ---------------- | ------------------------------------------------------------------------------------------------------- |
-| **auth**          | `auth/`          | Microsserviço de autenticação, emissão de JWT e controle atômico do limite de gastos do usuário.        |
+| Modulo            | Pasta            | Descricao                                                                                                  |
+| ----------------- | ---------------- | ---------------------------------------------------------------------------------------------------------- |
+| **auth**          | `auth/`          | Microsserviço de autenticação, emissão de JWT e controle atômico do limite de gastos do usuário.           |
 | **tickets-tools** | `tickets-tools/` | Servidor MCP contendo as regras de negócio de catálogo, cálculo de valores, estoque e compra de ingressos. |
-| **gemini-chat**   | `gemini-chat/`   | Aplicação Next.js com interface de chat, cliente MCP via Stdio, tradutor de schemas e executor de sessão. |
+| **gemini-chat**   | `gemini-chat/`   | Aplicação Next.js com interface de chat, cliente MCP via Stdio, tradutor de schemas e executor de sessão.  |
 
 ### auth
 
-* **Localização:** [`auth/`](./auth)
-* **Porta padrão:** `4000`
-* **Banco de dados:** SQLite (`auth/auth.db`)
-* **Principais Endpoints:**
-  * `POST /login`: Valida credenciais e emite token JWT com payload contendo `userId`, `username` e limites.
-  * `GET /me`: Rota autenticada que retorna o perfil e saldo atualizado do usuário.
-  * `PATCH /me/limite`: Rota autenticada que realiza o débito atômico concorrente no banco via query condicional `WHERE limite_total - limite_gasto >= ?`.
-* **Segurança:** O limite é controlado exclusivamente pelo banco; qualquer tentativa de débito superior ao limite disponível é rejeitada com status 400 e código `LIMITE_EXCEDIDO`.
+- **Localização:** [`auth/`](./auth)
+- **Porta padrão:** `4000`
+- **Banco de dados:** SQLite (`auth/auth.db`)
+- **Principais Endpoints:**
+  - `POST /login`: Valida credenciais e emite token JWT com payload contendo `userId`, `username` e limites.
+  - `POST /registrar`: Cria uma nova conta com limite de gasto padrão (R$ 500,00) e retorna JWT, permitindo cadastro direto pela tela de login.
+  - `GET /me`: Rota autenticada que retorna o perfil e saldo atualizado do usuário.
+  - `PATCH /me/limite`: Rota autenticada que realiza o débito atômico concorrente no banco via query condicional `WHERE limite_total - limite_gasto >= ?`.
+- **Segurança:** O limite é controlado exclusivamente pelo banco; qualquer tentativa de débito superior ao limite disponível é rejeitada com status 400 e código `LIMITE_EXCEDIDO`.
+- **CORS:** Habilitado de forma irrestrita (`app.use(cors())`) para permitir chamadas do frontend em desenvolvimento; deve ser restringido antes de qualquer deploy real.
 
 ### tickets-tools
 
-* **Localização:** [`tickets-tools/`](./tickets-tools)
-* **Transporte:** Stdio Server (invocado via processo filho pelo `gemini-chat`)
-* **Banco de dados:** SQLite (`tickets-tools/ingressos.db`)
-* **Ferramentas MCP Expostas:**
+- **Localização:** [`tickets-tools/`](./tickets-tools)
+- **Transporte:** Stdio Server (invocado via processo filho pelo `gemini-chat`)
+- **Banco de dados:** SQLite (`tickets-tools/ingressos.db`)
+- **Ferramentas MCP Expostas:**
   1. `listar_catalogo`: Lista os eventos cadastrados, aplicando filtro opcional de categoria e executando limpeza de intenções expiradas.
   2. `registrar_intencao`: Calcula o valor total com função pura (`calcularValorTotal`), decrementa vagas atômicas no banco (`decrementarVagas`) e cria intenção temporária de 5 minutos.
   3. `realizar_compra`: Valida integridade da intenção, consulta e debita limite via `auth/` e confirma transação financeira com prevenção de concorrência (`confirmarPagamentoIntencao`).
-* **Estorno Automático:** A função `expirarIntencoesVencidas` é executada automaticamente antes de listagens e novos registros, devolvendo vagas de intenções não pagas ao estoque (`incrementarVagas`) respeitando o teto de `vagas_totais`.
+- **Estorno Automático:** A função `expirarIntencoesVencidas` é executada automaticamente antes de listagens e novos registros, devolvendo vagas de intenções não pagas ao estoque (`incrementarVagas`) respeitando o teto de `vagas_totais`.
 
 ### gemini-chat
 
-* **Localização:** [`gemini-chat/`](./gemini-chat)
-* **Porta padrão:** `3000`
-* **Camadas Principais:**
-  * `src/mcp/client.ts`: Gerencia o ciclo de vida do cliente MCP em padrão Singleton, conectando-se via `StdioClientTransport`.
-  * `src/mcp/adapter.ts`: Converte os schemas JSON das ferramentas para `FunctionDeclaration` do Gemini, removendo `usuario_id` e `token` da visão do modelo.
-  * `src/mcp/executor.ts`: Intercepta os tool calls do modelo e injeta deterministicamente o `usuario_id` e o `token` JWT validados na sessão.
-  * `src/utils/tratarErro.ts`: Traduz retornos do tipo `ErroTool` em mensagens claras e amigáveis em linguagem natural.
-  * `src/app/api/chat/route.ts`: Endpoint orquestrador que coordena o loop conversacional com a API do Google Gemini.
+- **Localização:** [`gemini-chat/`](./gemini-chat)
+- **Porta padrão:** `3000`
+- **Camadas Principais:**
+  - `src/mcp/client.ts`: Gerencia o ciclo de vida do cliente MCP em padrão Singleton, conectando-se via `StdioClientTransport`.
+  - `src/mcp/adapter.ts`: Converte os schemas JSON das ferramentas para `FunctionDeclaration` do Gemini, removendo `usuario_id` e `token` da visão do modelo.
+  - `src/mcp/executor.ts`: Intercepta os tool calls do modelo e injeta deterministicamente o `usuario_id` e o `token` JWT validados na sessão.
+  - `src/utils/tratarErro.ts`: Traduz retornos do tipo `ErroTool` em mensagens claras e amigáveis em linguagem natural.
+  - `src/app/api/chat/route.ts`: Endpoint orquestrador que coordena o loop conversacional com a API do Google Gemini.
 
 ---
 
@@ -267,15 +269,15 @@ export interface ErroTool {
 }
 ```
 
-| Codigo de Erro        | Ferramenta / Rota                        | Causa / Cenario                                                                 |
-| --------------------- | ---------------------------------------- | ------------------------------------------------------------------------------- |
-| `INTENCAO_INVALIDA`   | `registrar_intencao` / `realizar_compra` | Evento inexistente, intenção não encontrada ou pertencente a outro usuário      |
-| `VAGAS_INSUFICIENTES` | `registrar_intencao`                     | Quantidade solicitada indisponível ou evento esgotado                           |
-| `INTENCAO_JA_PAGA`    | `realizar_compra`                        | Intenção já utilizada em transação anterior                                     |
-| `INTENCAO_EXPIRADA`   | `realizar_compra`                        | Tentativa de pagamento após a janela de 5 minutos                               |
-| `LIMITE_EXCEDIDO`     | `realizar_compra` / `PATCH /me/limite`   | Valor da compra excede o saldo de limite disponível no módulo auth              |
-| `METODO_INVALIDO`     | `realizar_compra`                        | Método diferente de `cartao` ou `pix`                                           |
-| `ERRO_INTERNO`        | Todas                                    | Falha de infraestrutura, comunicação ou banco de dados                          |
+| Codigo de Erro        | Ferramenta / Rota                        | Causa / Cenario                                                            |
+| --------------------- | ---------------------------------------- | -------------------------------------------------------------------------- |
+| `INTENCAO_INVALIDA`   | `registrar_intencao` / `realizar_compra` | Evento inexistente, intenção não encontrada ou pertencente a outro usuário |
+| `VAGAS_INSUFICIENTES` | `registrar_intencao`                     | Quantidade solicitada indisponível ou evento esgotado                      |
+| `INTENCAO_JA_PAGA`    | `realizar_compra`                        | Intenção já utilizada em transação anterior                                |
+| `INTENCAO_EXPIRADA`   | `realizar_compra`                        | Tentativa de pagamento após a janela de 5 minutos                          |
+| `LIMITE_EXCEDIDO`     | `realizar_compra` / `PATCH /me/limite`   | Valor da compra excede o saldo de limite disponível no módulo auth         |
+| `METODO_INVALIDO`     | `realizar_compra`                        | Método diferente de `cartao` ou `pix`                                      |
+| `ERRO_INTERNO`        | Todas                                    | Falha de infraestrutura, comunicação ou banco de dados                     |
 
 ### Decisoes Tecnicas Consolidadas
 
@@ -293,11 +295,11 @@ export interface ErroTool {
 
 ### Pre-requisitos
 
-| Dependencia        | Versao minima      | Link                                           |
-| ------------------ | ------------------ | ---------------------------------------------- |
-| Node.js            | `20.14.0+`         | https://nodejs.org                             |
-| npm                | `10.0.0+`          | https://www.npmjs.com                          |
-| Chave Gemini API   | N/A                | https://ai.google.dev/gemini-api/docs/api-key  |
+| Dependencia      | Versao minima | Link                                          |
+| ---------------- | ------------- | --------------------------------------------- |
+| Node.js          | `20.14.0+`    | https://nodejs.org                            |
+| npm              | `10.0.0+`     | https://www.npmjs.com                         |
+| Chave Gemini API | N/A           | https://ai.google.dev/gemini-api/docs/api-key |
 
 ### Variaveis de Ambiente
 
@@ -308,10 +310,11 @@ Cada módulo possui seu arquivo de exemplo correspondente:
 - `gemini-chat/.env.local.example`
 
 Exemplo de configuração para `gemini-chat/.env.local`:
+
 ```env
 GEMINI_API_KEY=sua_chave_do_google_ai_studio
-GEMINI_MODEL=gemini-2.5-flash
-AUTH_SERVICE_URL=http://localhost:4000
+GEMINI_MODEL=gemini-3.5-flash-lite
+NEXT_PUBLIC_AUTH_URL=http://localhost:4000
 ```
 
 > **Aviso de Segurança:** A chave `GEMINI_API_KEY` deve ser configurada estritamente no backend. Nunca exponha credenciais no frontend ou em commits públicos.
@@ -376,13 +379,13 @@ npm test
 ### Matriz de Testes Automatizados
 
 | Modulo            | Arquivo de Teste               | Total Testes | Cobertura / Foco Principal                                                                |
-| -------------------| --------------------------------| --------------| -------------------------------------------------------------------------------------------|
+| ----------------- | ------------------------------ | ------------ | ----------------------------------------------------------------------------------------- |
 | **auth**          | `tests/limite.test.ts`         | 12           | Débito atômico em `PATCH /me/limite`, validação de saldo e concorrência                   |
 | **auth**          | `tests/escopoIntencao.test.ts` | 3            | Vínculo de `usuario_id` e extração de identidade de sessão                                |
 | **tickets-tools** | `tests/calculo.test.ts`        | 12           | Precisão decimal (IEEE 754), números inteiros, quantidades e valores positivos            |
 | **tickets-tools** | `tests/tools.test.ts`          | 19           | Validação de catálogo, registro de intenção, compra aprovada e casos de erro (`ErroTool`) |
-| **tickets-tools** | `tests/jailbreak.test.ts`      | 5            | Resistência a bypass de valores, injeção de payloads, TOCTOU e datas forjadas              |
-| **tickets-tools** | `tests/estorno.test.ts`        | 8            | Estorno de vagas expiradas, varredura em lote e liberação proativa de assentos             |
+| **tickets-tools** | `tests/jailbreak.test.ts`      | 5            | Resistência a bypass de valores, injeção de payloads, TOCTOU e datas forjadas             |
+| **tickets-tools** | `tests/estorno.test.ts`        | 8            | Estorno de vagas expiradas, varredura em lote e liberação proativa de assentos            |
 | **gemini-chat**   | `tests/mcpClient.test.ts`      | 8            | Transporte Stdio, Singleton, listagem dinâmica e execução de chamadas MCP                 |
 | **gemini-chat**   | `tests/mcpAdapter.test.ts`     | 5            | Conversão de tipos JSONSchema para Gemini e remoção de credenciais de sessão              |
 | **gemini-chat**   | `tests/mcpExecutor.test.ts`    | 6            | Injeção mandatória de `usuario_id`/`token`, blindagem anti-tampering e validações         |
@@ -391,7 +394,6 @@ npm test
 ### Validação de Dependências e Requisitos (requirements.txt)
 
 Todas as versões de runtime, protocolos e pacotes fixados no arquivo [`requirements.txt`](./requirements.txt) refletem o estado funcional do monorepo e são validados cruzadamente contra os `package.json` dos três módulos (`auth/`, `tickets-tools/`, `gemini-chat/`), garantindo reprodutibilidade e conformidade técnica para homologação.
-
 
 ---
 
@@ -402,7 +404,7 @@ Todas as versões de runtime, protocolos e pacotes fixados no arquivo [`requirem
 ### Estrategia de Branches
 
 | Branch            | Finalidade                                                              |
-| -------------------| -------------------------------------------------------------------------|
+| ----------------- | ----------------------------------------------------------------------- |
 | `main`            | Versão estável em produção                                              |
 | `prod`            | Branch de entrega e alinhamento de produção                             |
 | `stage`           | Versão de homologação, observação e testes de usabilidade               |
@@ -425,7 +427,7 @@ Todas as versões de runtime, protocolos e pacotes fixados no arquivo [`requirem
 -->
 
 | Contribuidor                         | Commits |
-| --------------------------------------| ---------|
+| ------------------------------------ | ------- |
 | Pedro Cesar P. Lima / PCLima         | 21      |
 | Éverson Filipe Campos da Silva Moura | 18      |
 | Luis Filipe Mendes Nogueira          | 13      |
@@ -435,7 +437,7 @@ Todas as versões de runtime, protocolos e pacotes fixados no arquivo [`requirem
 ### Tarefas Concluidas do Backlog
 
 | Tarefa                                                                                                                                        | Status    | Modulo                  |
-| :----------------------------------------------------------------------------------------------------------------------------------------------| :----------| :------------------------|
+| :-------------------------------------------------------------------------------------------------------------------------------------------- | :-------- | :---------------------- |
 | @time: Definir stack (linguagem e paradigma), modelo LLM (Ollama local vs. API na nuvem) e transporte MCP (stdio ou HTTP)                     | Concluído | Geral                   |
 | @Pedro César: Inicializar repositório e estrutura de pastas (usar commits semânticos)                                                         | Concluído | Geral                   |
 | @Pedro César: Padronizar contrato de erro das tools                                                                                           | Concluído | `docs`, `tickets-tools` |
@@ -446,6 +448,8 @@ Todas as versões de runtime, protocolos e pacotes fixados no arquivo [`requirem
 | @Pedro César: Validar limite de gasto -> LIMITE_EXCEDIDO                                                                                      | Concluído | `auth`, `tickets-tools` |
 | @Pedro César: Validar método de pagamento -> METODO_INVALIDO                                                                                  | Concluído | `tickets-tools`         |
 | @Pedro César: Tratar retorno de erro em linguagem natural                                                                                     | Concluído | `gemini-chat`           |
+| @Pedro César: Adicionar rota de registro de conta e habilitar CORS no modulo auth                                                             | Concluído | `auth`                  |
+| @Pedro César: Corrigir atualizacao do limite de gasto exibido apos compra aprovada                                                            | Concluído | `gemini-chat`           |
 | @Luis Filipe Mendes Nogueira: Criar seed do catálogo de produtos                                                                              | Concluído | `tickets-tools`         |
 | @Luis Filipe Mendes Nogueira: Criar seed de usuários com limite de gasto                                                                      | Concluído | `auth`                  |
 | @Luis Filipe Mendes Nogueira: Validar expiração -> INTENCAO_EXPIRADA                                                                          | Concluído | `tickets-tools`         |
@@ -464,11 +468,10 @@ Todas as versões de runtime, protocolos e pacotes fixados no arquivo [`requirem
 | @Éverson Filipe Campos Da Silva Moura: Implementar Executor Seguro com injeção obrigatória de usuario_id e token (`src/mcp/executor.ts`)      | Concluído | `gemini-chat`           |
 | @Éverson Filipe Campos Da Silva Moura (ad-hoc): Aprofundar boilerplate de documentação técnica do README.md                                   | Concluído | `docs`                  |
 
-
 ### Epicos do Kanban
 
 | Epico                     | Descricao                                                                                                 |
-| ---------------------------| -----------------------------------------------------------------------------------------------------------|
+| ------------------------- | --------------------------------------------------------------------------------------------------------- |
 | **1 - MCP**               | Definição da camada MCP, transporte stdio e padronização do contrato de ferramentas e erros               |
 | **2 - AUTH E LIMITE**     | Autenticação JWT, sessões e controle transacional de limites de gasto                                     |
 | **3 - REGRAS DE NEGÓCIO** | Catálogo, cálculo financeiro, reserva atômica de vagas, estornos automáticos e prevenção a overbooking    |
@@ -482,7 +485,7 @@ Todas as versões de runtime, protocolos e pacotes fixados no arquivo [`requirem
 ### Referencias Externas
 
 | Referencia                    | URL                                                                 | Descricao                                          |
-| -------------------------------| ---------------------------------------------------------------------| ----------------------------------------------------|
+| ----------------------------- | ------------------------------------------------------------------- | -------------------------------------------------- |
 | Model Context Protocol (MCP)  | https://modelcontextprotocol.io                                     | Especificação oficial do protocolo MCP             |
 | Google Gemini API: Tools      | https://ai.google.dev/gemini-api/docs/function-calling              | Documentação de Function Calling do Gemini SDK     |
 | Spec-Driven Development (SDD) | https://martinfowler.com/articles/exploring-gen-ai/sdd-3-tools.html | Contrato normativo de API e ferramentas do projeto |
