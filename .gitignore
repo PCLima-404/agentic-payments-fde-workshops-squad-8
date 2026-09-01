@@ -9,5 +9,4 @@ build/
 *.db
 *.db-wal
 *.db-shm
-
-.env
+.agents/
