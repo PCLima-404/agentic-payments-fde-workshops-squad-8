@@ -1,0 +1,34 @@
+services:
+  auth:
+    build:
+      context: ./auth
+    ports:
+      - "4000:4000"
+    environment:
+      PORT: 4000
+      JWT_SECRET: ${JWT_SECRET}
+    restart: unless-stopped
+
+  app:
+    build:
+      context: .
+      dockerfile: gemini-chat/Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-2.5-flash}
+      # Alcançado pelo NAVEGADOR (browser), por isso localhost — não "auth"
+      NEXT_PUBLIC_AUTH_URL: http://localhost:4000
+      # Alcançado pelo tickets-tools DENTRO do container, via rede interna
+      AUTH_SERVICE_URL: http://auth:4000
+      # Caminho fixo do banco SQLite, dentro do volume persistente abaixo
+      DB_PATH: /app/data/ingressos.db
+    volumes:
+      - ingressos_db:/app/data
+    depends_on:
+      - auth
+    restart: unless-stopped
+
+volumes:
+  ingressos_db:

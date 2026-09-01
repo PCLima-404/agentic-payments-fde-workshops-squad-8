@@ -2,15 +2,16 @@
 // Testes unitários e de integração para o endpoint HTTP POST /api/chat (route.ts).
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { POST, extrairSessaoDoToken } from "../src/app/api/chat/route";
+import { POST } from "../src/app/api/chat/route";
+import { extrairSessaoDoToken } from "../src/utils/sessao";
 import * as agentModule from "../src/services/geminiAgent";
 import { NextRequest } from "next/server";
 
 // Helper para gerar tokens JWT válidos em formato base64url para testes
 function criarTokenJwtMock(payload: Record<string, unknown>): string {
-  const header = Buffer.from(JSON.stringify({ alg: "HS256", typ: "JWT" })).toString(
-    "base64url"
-  );
+  const header = Buffer.from(
+    JSON.stringify({ alg: "HS256", typ: "JWT" }),
+  ).toString("base64url");
   const body = Buffer.from(JSON.stringify(payload)).toString("base64url");
   const signature = "mock_signature_bytes";
 
@@ -172,7 +173,12 @@ describe("Endpoint HTTP /api/chat (gemini-chat/src/app/api/chat/route.ts)", () =
           resposta: "Olá Pedro! Temos vários workshops disponíveis.",
           historico: [
             { role: "user", parts: [{ text: "Olá" }] },
-            { role: "model", parts: [{ text: "Olá Pedro! Temos vários workshops disponíveis." }] },
+            {
+              role: "model",
+              parts: [
+                { text: "Olá Pedro! Temos vários workshops disponíveis." },
+              ],
+            },
           ],
           iteracoes: 1,
         });
@@ -191,7 +197,9 @@ describe("Endpoint HTTP /api/chat (gemini-chat/src/app/api/chat/route.ts)", () =
       expect(res.status).toBe(200);
 
       const json = await res.json();
-      expect(json.resposta).toBe("Olá Pedro! Temos vários workshops disponíveis.");
+      expect(json.resposta).toBe(
+        "Olá Pedro! Temos vários workshops disponíveis.",
+      );
       expect(json.historico.length).toBe(2);
       expect(json.iteracoes).toBe(1);
 
@@ -199,7 +207,7 @@ describe("Endpoint HTTP /api/chat (gemini-chat/src/app/api/chat/route.ts)", () =
         [{ role: "user", content: "Olá" }],
         { id: "usr_pedro_001", username: "pedro" },
         tokenValido,
-        5
+        5,
       );
     });
 
@@ -235,7 +243,7 @@ describe("Endpoint HTTP /api/chat (gemini-chat/src/app/api/chat/route.ts)", () =
         [{ role: "user", content: "Teste limite customizado" }],
         { id: "usr_pedro_001", username: "pedro" },
         tokenValido,
-        3
+        3,
       );
     });
 
@@ -249,7 +257,7 @@ describe("Endpoint HTTP /api/chat (gemini-chat/src/app/api/chat/route.ts)", () =
       });
 
       vi.spyOn(agentModule, "executarLoopAgente").mockRejectedValue(
-        new Error("Falha crítica de comunicação com o modelo Gemini.")
+        new Error("Falha crítica de comunicação com o modelo Gemini."),
       );
 
       const req = new NextRequest("http://localhost:3000/api/chat", {

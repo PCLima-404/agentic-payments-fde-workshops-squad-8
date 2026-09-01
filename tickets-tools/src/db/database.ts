@@ -2,9 +2,11 @@ import Database from "better-sqlite3";
 import path from "path";
 
 // Caminho do arquivo SQLite (compatível com src/ e dist/src/)
-const dbPath = __dirname.includes("dist")
-  ? path.resolve(__dirname, "../../../ingressos.db")
-  : path.resolve(__dirname, "../../ingressos.db");
+const dbPath =
+  process.env.DB_PATH ||
+  (__dirname.includes("dist")
+    ? path.resolve(__dirname, "../../../ingressos.db")
+    : path.resolve(__dirname, "../../ingressos.db"));
 export const db = new Database(dbPath);
 
 db.pragma("journal_mode = WAL");
