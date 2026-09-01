@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import type { Content } from "@google/generative-ai";
 import type { MensagemUI, Usuario } from "../types";
 import { enviarMensagem, buscarPerfil } from "../services/api";
@@ -22,6 +23,7 @@ interface ChatWindowProps {
 }
 
 export default function ChatWindow({ token, usuarioInicial }: ChatWindowProps) {
+  const router = useRouter();
   const [historico, setHistorico] = useState<Content[]>([]);
   const [mensagens, setMensagens] = useState<MensagemUI[]>([]);
   const [entrada, setEntrada] = useState("");
@@ -33,6 +35,11 @@ export default function ChatWindow({ token, usuarioInicial }: ChatWindowProps) {
   const [usuario, setUsuario] = useState<Usuario>(usuarioInicial);
 
   const pedido = extrairPedidoAtual(historico);
+
+  function handleLogout() {
+    localStorage.removeItem("ingressos_token");
+    router.push("/login");
+  }
 
   async function enviar(texto: string) {
     if (!texto.trim() || carregando) return;
@@ -114,6 +121,20 @@ export default function ChatWindow({ token, usuarioInicial }: ChatWindowProps) {
           {/* Barra de consumo omitida: o backend hoje só expõe o valor
               restante, não o limite total original — sem isso não dá
               pra calcular um percentual real. Ver docs/contrato-api.md. */}
+        </div>
+
+        <div className="ig-lateral-usuario">
+          <div className="ig-lateral-usuario__info">
+            <span className="ig-lateral-usuario__rotulo">Conectado como</span>
+            <strong className="ig-lateral-usuario__nome">{usuario.username}</strong>
+          </div>
+          <button
+            type="button"
+            className="ig-botao ig-botao--contorno ig-botao--compacto ig-lateral-usuario__sair"
+            onClick={handleLogout}
+          >
+            Sair da conta
+          </button>
         </div>
       </div>
 
