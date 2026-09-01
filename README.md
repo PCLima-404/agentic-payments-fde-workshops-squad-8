@@ -451,7 +451,7 @@ npm test
 ### Matriz de Testes Automatizados
 
 | Modulo            | Arquivo de Teste               | Total Testes | Cobertura / Foco Principal                                                                |
-| ----------------- | ------------------------------ | ------------ | ----------------------------------------------------------------------------------------- |
+| -------------------| --------------------------------| --------------| -------------------------------------------------------------------------------------------|
 | **auth**          | `tests/limite.test.ts`         | 12           | Débito atômico em `PATCH /me/limite`, validação de saldo e concorrência                   |
 | **auth**          | `tests/escopoIntencao.test.ts` | 3            | Vínculo de `usuario_id` e extração de identidade de sessão                                |
 | **tickets-tools** | `tests/calculo.test.ts`        | 12           | Precisão decimal (IEEE 754), números inteiros, quantidades e valores positivos            |
@@ -553,23 +553,26 @@ Demonstração do fluxo operacional das chamadas de ferramentas, requisições d
 
 #### A. Fluxo de Autenticação e Emissão de Token JWT (`POST /login`)
 <!-- Captura do DevTools inspecionando o payload de login e retorno do Bearer Token -->
-![DevTools Network Login](./docs/screenshots/devtools-network-login.png)
+![DevTools Network Login 1](./docs/screenshots/login1.png)
+![DevTools Network Login 2](./docs/screenshots/login2.png)
+![DevTools Network Login 3](./docs/screenshots/login3.png)
+![DevTools Network Login 4](./docs/screenshots/login4.png)
+![DevTools Network Login 5](./docs/screenshots/postlogin1.png)
+![DevTools Network Login 6](./docs/screenshots/postlogin2.png)
 
 #### B. Invocação de Ferramenta de Consulta de Catálogo (`listar_catalogo`)
 <!-- Captura do log de requisição do modelo disparando a tool listar_catalogo no MCP -->
-![DevTools ToolCall Catalogo](./docs/screenshots/devtools-toolcall-catalog.png)
+![DevTools ToolCall Catalogo 1](./docs/screenshots/tool1.png)
+![DevTools ToolCall Catalogo 2](./docs/screenshots/tool2.png)
+![DevTools ToolCall Catalogo 3](./docs/screenshots/tool3.png)
 
 #### C. Registro de Intenção e Injeção de Sessão (`registrar_intencao`)
 <!-- Captura do DevTools exibindo a interceptação do route.ts e injeção de usuario_id -->
-![DevTools ToolCall Reserva](./docs/screenshots/devtools-toolcall-reserva.png)
+![DevTools ToolCall Reserva](./docs/screenshots/intencao1.png)
 
-#### D. Execução de Compra e Débito Atômico (`realizar_compra` e `PATCH /me/limite`)
+#### D. Execução de Compra e Débito Atômico (`realizar_compra`)
 <!-- Captura da chamada de pagamento com verificação de limites e confirmação de estoque -->
-![DevTools ToolCall Compra](./docs/screenshots/devtools-toolcall-compra.png)
-
-#### E. Trilhas de Auditoria Estruturada no Backend (`audit.ts`)
-<!-- Captura dos logs de auditoria estruturada gerados em tickets-tools -->
-![Logs de Auditoria no Terminal](./docs/screenshots/terminal-audit-logs.png)
+![DevTools ToolCall Compra](./docs/screenshots/comprarealizada1.png)
 
 ---
 
