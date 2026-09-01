@@ -248,6 +248,43 @@ textarea {
   border: var(--borda);
   color: var(--c-tinta);
 }
+.ig-fala__markdown p {
+  margin: 0 0 var(--e-2) 0;
+}
+.ig-fala__markdown p:last-child {
+  margin-bottom: 0;
+}
+.ig-fala__markdown strong {
+  font-weight: 600;
+}
+.ig-fala__markdown ul,
+.ig-fala__markdown ol {
+  margin: 0 0 var(--e-2) 0;
+  padding-left: var(--e-4);
+}
+.ig-fala__markdown li {
+  margin-bottom: var(--e-1);
+}
+.ig-fala__markdown code {
+  font: 400 13px/1.4 var(--fonte-interna);
+  background: var(--c-neutro-claro);
+  padding: 1px 4px;
+}
+.ig-fala__markdown pre {
+  font: 400 13px/1.5 var(--fonte-interna);
+  background: var(--c-neutro-claro);
+  border: var(--borda-fraca);
+  padding: var(--e-3);
+  overflow-x: auto;
+  margin: 0 0 var(--e-2) 0;
+}
+.ig-fala__markdown pre code {
+  background: none;
+  padding: 0;
+}
+.ig-fala__markdown a {
+  color: var(--c-acao);
+}
 
 /* Barra de escrita. Chips em cima, campo e botão embaixo. */
 .ig-escrita {
