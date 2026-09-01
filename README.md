@@ -57,6 +57,9 @@
 - [Testes](#testes)
 - [Regras de Repositorio](#regras-de-repositorio)
   - [Estrategia de Branches](#estrategia-de-branches)
+- [Planejamento e Gestao de Produto](#planejamento-e-gestao-de-produto)
+  - [Discovery e Estruturacao de Epicos](#discovery-e-estruturacao-de-epicos)
+  - [Evidencias Visuais do Board no FigJam](#evidencias-visuais-do-board-no-figjam)
 - [Atribuicoes e Backlog](#atribuicoes-e-backlog)
   - [Commits por Contribuidor](#commits-por-contribuidor)
   - [Tarefas Concluidas do Backlog](#tarefas-concluidas-do-backlog)
@@ -70,7 +73,7 @@
 O projeto implementa uma arquitetura local de **Pagamentos Agênticos** orientada a ferramentas, separando de forma estrita o plano de raciocínio da IA do plano de execução financeira e controle de estoque.
 
 | Atributo                | Valor                                                                                                                                                             |
-| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| -------------------------| -------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **Contexto**            | Projeto de finalizacao: UOL / Agentic Payments e hand-off para a fase 2                                                                                           |
 | **Squad**               | Squad 8                                                                                                                                                           |
 | **Branch de entrega**   | `main`                                                                                                                                                            |
@@ -415,6 +418,41 @@ Todas as versões de runtime, protocolos e pacotes fixados no arquivo [`requirem
 
 ---
 
+## Planejamento e Gestao de Produto
+
+Para traduzir a dinâmica de uma equipe de desenvolvimento sênior na UOL / Compass, a Squad 8 planejou e acompanhou todo o ciclo de produto através de sessões diárias de discovery (27 a 31 de Agosto) e gerenciamento ágil via quadro Kanban no FigJam:
+
+> **Documento Completo de Planejamento e ADRs:** [`docs/planejamento.md`](./docs/planejamento.md)  
+> **Quadro Oficial no FigJam:** [https://www.figma.com/board/fuvlMSJtHwcVPCh1t2NbxZ/Planejamento-Projeto-Compass-UOL?node-id=0-1&t=SyuwYfN6naNAYsu6-1](https://www.figma.com/board/fuvlMSJtHwcVPCh1t2NbxZ/Planejamento-Projeto-Compass-UOL?node-id=0-1&t=SyuwYfN6naNAYsu6-1)
+
+### Discovery e Estruturacao de Epicos
+
+O backlog foi originado a partir do discovery técnico e organizado em **5 épicos fundamentais**:
+1. **MCP (Model Context Protocol):** Transporte Stdio, schemas de ferramentas e camada de isolamento (Shielding Layer).
+2. **AUTH e Limite:** Emissão de JWT (RFC 7519), microsserviço Express e controle transacional com débito atômico de saldo.
+3. **Regras de Negócio:** Cálculo monetário no backend, estorno proativo de assentos vencidos (`expirarIntencoesVencidas`) e prevenção contra TOCTOU.
+4. **Agente (API e Loop):** Orquestrador multi-turn no Gemini, trava de proteção (`maxIteracoes = 5`), 10 regras invioláveis de antiprompting e injeção de sessão.
+5. **Front-end:** Interface Next.js 14, gerenciamento de tokens e experiência conversacional no chat.
+
+### Evidencias Visuais do Board no FigJam
+
+Abaixo estão os registros visuais do processo de planejamento e acompanhamento do time:
+
+#### A. Visão Geral do Board no FigJam
+![Visão Geral do Board no FigJam](./docs/screenshots/figjam-board-screenshot.png)
+
+#### B. Estrutura de Colunas do Kanban (Backlog, To Do, Doing, Done e Decisões)
+![Estrutura de Colunas Kanban](./docs/screenshots/figjam-kanban-board.png)
+
+#### C. Sessão de Discovery e Mapeamento de Épicos
+![Discovery e Épicos no Board](./docs/screenshots/figjam-discovery-1.png)
+![Discovery e Épicos no Board 2](./docs/screenshots/figjam-epics-discovery-1.png)
+
+#### D. Quadro de Histórico de Decisões Arquiteturais
+![Histórico de Decisões no Board](./docs/screenshots/figjam-decisions-board-1.png)
+
+---
+
 ## Atribuicoes e Backlog
 
 ### Commits por Contribuidor
@@ -427,17 +465,17 @@ Todas as versões de runtime, protocolos e pacotes fixados no arquivo [`requirem
 -->
 
 | Contribuidor                         | Commits |
-| ------------------------------------ | ------- |
-| Pedro Cesar P. Lima / PCLima         | 21      |
-| Éverson Filipe Campos da Silva Moura | 18      |
-| Luis Filipe Mendes Nogueira          | 13      |
+| --------------------------------------| ---------|
+| Pedro Cesar P. Lima / PCLima         | 25      |
+| Éverson Filipe Campos da Silva Moura | 27      |
+| Luis Filipe Mendes Nogueira          | 15      |
 
 <!-- PREENCHER: adicione os demais membros do squad conforme contribuirem via commits. -->
 
 ### Tarefas Concluidas do Backlog
 
 | Tarefa                                                                                                                                        | Status    | Modulo                  |
-| :-------------------------------------------------------------------------------------------------------------------------------------------- | :-------- | :---------------------- |
+| :----------------------------------------------------------------------------------------------------------------------------------------------| :----------| :------------------------|
 | @time: Definir stack (linguagem e paradigma), modelo LLM (Ollama local vs. API na nuvem) e transporte MCP (stdio ou HTTP)                     | Concluído | Geral                   |
 | @Pedro César: Inicializar repositório e estrutura de pastas (usar commits semânticos)                                                         | Concluído | Geral                   |
 | @Pedro César: Padronizar contrato de erro das tools                                                                                           | Concluído | `docs`, `tickets-tools` |
@@ -471,7 +509,7 @@ Todas as versões de runtime, protocolos e pacotes fixados no arquivo [`requirem
 ### Epicos do Kanban
 
 | Epico                     | Descricao                                                                                                 |
-| ------------------------- | --------------------------------------------------------------------------------------------------------- |
+| ---------------------------| -----------------------------------------------------------------------------------------------------------|
 | **1 - MCP**               | Definição da camada MCP, transporte stdio e padronização do contrato de ferramentas e erros               |
 | **2 - AUTH E LIMITE**     | Autenticação JWT, sessões e controle transacional de limites de gasto                                     |
 | **3 - REGRAS DE NEGÓCIO** | Catálogo, cálculo financeiro, reserva atômica de vagas, estornos automáticos e prevenção a overbooking    |
@@ -485,7 +523,7 @@ Todas as versões de runtime, protocolos e pacotes fixados no arquivo [`requirem
 ### Referencias Externas
 
 | Referencia                    | URL                                                                 | Descricao                                          |
-| ----------------------------- | ------------------------------------------------------------------- | -------------------------------------------------- |
+| -------------------------------| ---------------------------------------------------------------------| ----------------------------------------------------|
 | Model Context Protocol (MCP)  | https://modelcontextprotocol.io                                     | Especificação oficial do protocolo MCP             |
 | Google Gemini API: Tools      | https://ai.google.dev/gemini-api/docs/function-calling              | Documentação de Function Calling do Gemini SDK     |
 | Spec-Driven Development (SDD) | https://martinfowler.com/articles/exploring-gen-ai/sdd-3-tools.html | Contrato normativo de API e ferramentas do projeto |
@@ -495,5 +533,5 @@ Todas as versões de runtime, protocolos e pacotes fixados no arquivo [`requirem
 
 ---
 
-> Documentação técnica atualizada em: 29/08/2026 <br>
+> Documentação técnica atualizada em: 31/08/2026 <br>
 > Responsável pela revisão técnica: Éverson Filipe Campos da Silva Moura
