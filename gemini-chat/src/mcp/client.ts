@@ -66,6 +66,11 @@ export async function obterMcpClient(): Promise<Client> {
   mcpTransport = new StdioClientTransport({
     command: process.execPath,
     args: [serverPath],
+    // O SDK do MCP NÃO herda process.env por padrão (proteção de segurança
+    // interna do StdioClientTransport) — sem isso, o processo filho do
+    // tickets-tools não recebe DB_PATH, AUTH_SERVICE_URL etc, e volta a
+    // usar caminhos/valores padrão, quebrando em ambientes containerizados.
+    env: { ...process.env } as Record<string, string>,
   });
 
   const client = new Client(
@@ -75,7 +80,7 @@ export async function obterMcpClient(): Promise<Client> {
     },
     {
       capabilities: {},
-    }
+    },
   );
 
   await client.connect(mcpTransport);
@@ -103,7 +108,7 @@ export async function listarToolsDisponiveis(): Promise<ToolMcp[]> {
  */
 export async function chamarToolMcp(
   nome: string,
-  args: Record<string, unknown>
+  args: Record<string, unknown>,
 ): Promise<unknown> {
   const client = await obterMcpClient();
   const response = await client.callTool({
@@ -121,13 +126,20 @@ export async function chamarToolMcp(
     throw new Error(errorMsg);
   }
 
-  if (!response.content || !Array.isArray(response.content) || response.content.length === 0) {
+  if (
+    !response.content ||
+    !Array.isArray(response.content) ||
+    response.content.length === 0
+  ) {
     throw new Error(`A tool '${nome}' não retornou conteúdo válido.`);
   }
 
   const primeiroConteudo = response.content[0];
 
-  if (primeiroConteudo.type === "text" && typeof primeiroConteudo.text === "string") {
+  if (
+    primeiroConteudo.type === "text" &&
+    typeof primeiroConteudo.text === "string"
+  ) {
     try {
       return JSON.parse(primeiroConteudo.text);
     } catch {

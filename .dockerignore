@@ -1,0 +1,10 @@
+**/node_modules
+**/dist
+**/.next
+.git
+.env
+**/.env
+**/.env.local
+*.db
+*.db-journal
+*.db-wal
