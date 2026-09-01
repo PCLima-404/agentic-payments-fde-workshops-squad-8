@@ -430,38 +430,70 @@ docker compose down
 
 ## Testes
 
-A suíte de testes automatizados cobre 100% das regras críticas de negócio, integridade de dados e proteção adversarial.
+A suíte de testes automatizados cobre 100% das regras críticas de negócio, integridade transacional, precisão monetária, segurança de autenticação e proteção contra jailbreak e alucinações de IA. O monorepo conta com **114 testes automatizados** distribuídos em **14 arquivos de testes**.
 
-### Executando os Testes por Módulo
+### Como Executar os Testes
+
+#### 1. Execução por Módulo Individual
+Execute a suíte em cada módulo a partir de seu respectivo diretório:
 
 ```bash
-# Testes do modulo auth (15 testes)
+# Modulo auth (15 testes)
 cd auth
 npm test
 
-# Testes do modulo tickets-tools (34 testes)
+# Modulo tickets-tools (44 testes)
 cd ../tickets-tools
 npm test
 
-# Testes do modulo gemini-chat (25 testes)
+# Modulo gemini-chat (55 testes)
 cd ../gemini-chat
 npm test
 ```
 
-### Matriz de Testes Automatizados
+#### 2. Execução de Arquivo de Teste Específico
+Para validar um arquivo isolado durante o desenvolvimento:
 
-| Modulo            | Arquivo de Teste               | Total Testes | Cobertura / Foco Principal                                                                |
-| -------------------| --------------------------------| --------------| -------------------------------------------------------------------------------------------|
-| **auth**          | `tests/limite.test.ts`         | 12           | Débito atômico em `PATCH /me/limite`, validação de saldo e concorrência                   |
-| **auth**          | `tests/escopoIntencao.test.ts` | 3            | Vínculo de `usuario_id` e extração de identidade de sessão                                |
-| **tickets-tools** | `tests/calculo.test.ts`        | 12           | Precisão decimal (IEEE 754), números inteiros, quantidades e valores positivos            |
-| **tickets-tools** | `tests/tools.test.ts`          | 19           | Validação de catálogo, registro de intenção, compra aprovada e casos de erro (`ErroTool`) |
-| **tickets-tools** | `tests/jailbreak.test.ts`      | 5            | Resistência a bypass de valores, injeção de payloads, TOCTOU e datas forjadas             |
-| **tickets-tools** | `tests/estorno.test.ts`        | 8            | Estorno de vagas expiradas, varredura em lote e liberação proativa de assentos            |
-| **gemini-chat**   | `tests/mcpClient.test.ts`      | 8            | Transporte Stdio, Singleton, listagem dinâmica e execução de chamadas MCP                 |
-| **gemini-chat**   | `tests/mcpAdapter.test.ts`     | 5            | Conversão de tipos JSONSchema para Gemini e remoção de credenciais de sessão              |
-| **gemini-chat**   | `tests/mcpExecutor.test.ts`    | 6            | Injeção mandatória de `usuario_id`/`token`, blindagem anti-tampering e validações         |
-| **gemini-chat**   | `tests/tratarErro.test.ts`     | 6            | Tradução de todos os códigos de `ErroTool` para linguagem natural amigável                |
+```bash
+# Testes de jailbreak e seguranca adversarial
+cd tickets-tools
+npx vitest run tests/jailbreak.test.ts
+
+# Testes do loop do agente e orquestracao
+cd ../gemini-chat
+npx vitest run tests/geminiAgent.test.ts
+```
+
+#### 3. Execução Global da Suíte em Linha Única
+A partir da raiz do projeto:
+
+```bash
+cd auth && npm test && cd ../tickets-tools && npm test && cd ../gemini-chat && npm test && cd ..
+```
+
+---
+
+### Matriz de Testes e Garantias Técnicas
+
+| Módulo | Arquivo de Teste | Qtd | Garantias Técnicas e Casos de Uso Cobertos |
+| :--- | :--- | :---: | :--- |
+| **auth** | `tests/limite.test.ts` | 12 | Débito atômico em `PATCH /me/limite`, bloqueio com `422 LIMITE_INSUFICIENTE`, integridade sob concorrência e consistência de saldo. |
+| **auth** | `tests/escopoIntencao.test.ts` | 3 | Extração e validação do `usuario_id` a partir do token JWT e vínculo de escopo de sessão. |
+| **tickets-tools** | `tests/calculo.test.ts` | 12 | Precisão decimal monetária em centavos, prevenção de erros IEEE 754, validação de tipos inteiros e bloqueio de valores negativos. |
+| **tickets-tools** | `tests/tools.test.ts` | 19 | Contratos das tools `listar_catalogo`, `registrar_intencao`, `realizar_compra` e retornos estruturados de `ErroTool`. |
+| **tickets-tools** | `tests/estorno.test.ts` | 8 | Varredura proativa de intenções vencidas (`expirarIntencoesVencidas`), devolução idempotente de assentos e prevenção de race conditions (TOCTOU). |
+| **tickets-tools** | `tests/jailbreak.test.ts` | 5 | Resistência a bypass de preços pela IA, injeção de parâmetros forjados, manipulação de `usuario_id` e reservas falsificadas. |
+| **gemini-chat** | `tests/chatRoute.test.ts` | 12 | Endpoint HTTP `POST /api/chat`, autenticação com Bearer token, expiração de JWT, validação de payloads e status HTTP (200, 400, 401, 500). |
+| **gemini-chat** | `tests/geminiAgent.test.ts` | 11 | Loop multi-turn de Tool Calling, trava de segurança `maxIteracoes = 5`, retry com backoff contra erros temporários (503/429) e anti-alucinação. |
+| **gemini-chat** | `tests/mcpClient.test.ts` | 8 | Singleton Stdio MCP client, gerenciamento do ciclo de vida do subprocesso e despacho remoto de ferramentas. |
+| **gemini-chat** | `tests/mcpExecutor.test.ts` | 6 | Injeção mandatória de `usuario_id` e `token` da sessão JWT no backend, blindando o MCP contra spoofing. |
+| **gemini-chat** | `tests/mcpAdapter.test.ts` | 5 | Conversão de JSONSchema para `FunctionDeclaration` do Gemini e camada de isolamento (Shielding Layer). |
+| **gemini-chat** | `tests/derivarPedido.test.ts` | 5 | Extração dinâmica e determinística do estado do pedido (Pendente, Aprovado, Recusado) a partir do histórico para o `OrderPanel`. |
+| **gemini-chat** | `tests/tratarErro.test.ts` | 6 | Tradução dos códigos de erro técnicos de backend em mensagens humanizadas e amigáveis em português natural. |
+| **gemini-chat** | `tests/vocabulario.test.ts` | 2 | Conformidade de termos da interface e consistência de comunicação com o comprador. |
+| **Total** | **14 arquivos de testes** | **114** | **100% de aprovação em testes unitários e de integração.** |
+
+---
 
 ### Validação de Dependências e Requisitos (requirements.txt)
 
@@ -589,8 +621,8 @@ Demonstração do fluxo operacional das chamadas de ferramentas, requisições d
 
 | Contribuidor                         | Commits |
 | --------------------------------------| ---------|
-| Pedro Cesar P. Lima / PCLima         | 26      |
-| Éverson Filipe Campos da Silva Moura | 33      |
+| Pedro Cesar P. Lima / PCLima         | 29      |
+| Éverson Filipe Campos da Silva Moura | 34      |
 | Luis Filipe Mendes Nogueira          | 18      |
 
 <!-- PREENCHER: adicione os demais membros do squad conforme contribuirem via commits. -->
@@ -656,5 +688,5 @@ Demonstração do fluxo operacional das chamadas de ferramentas, requisições d
 
 ---
 
-> Documentação técnica atualizada em: 31/08/2026 <br>
+> Documentação técnica atualizada em: 01/08/2026 <br>
 > Responsável pela revisão técnica: Éverson Filipe Campos da Silva Moura
