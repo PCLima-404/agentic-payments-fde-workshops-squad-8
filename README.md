@@ -52,14 +52,16 @@
 - [Instalacao e Execucao](#instalacao-e-execucao)
   - [Pre-requisitos](#pre-requisitos)
   - [Variaveis de Ambiente](#variaveis-de-ambiente)
-  - [Inicializacao dos bancos e seeds](#inicializacao-dos-bancos-e-seeds)
-  - [Executando Localmente](#executando-localmente)
+  - [Opcao 1: Execucao Local (Sem Docker)](#opcao-1-execucao-local-sem-docker)
+  - [Opcao 2: Execucao com Docker Compose](#opcao-2-execucao-com-docker-compose)
 - [Testes](#testes)
 - [Regras de Repositorio](#regras-de-repositorio)
   - [Estrategia de Branches](#estrategia-de-branches)
 - [Planejamento e Gestao de Produto](#planejamento-e-gestao-de-produto)
   - [Discovery e Estruturacao de Epicos](#discovery-e-estruturacao-de-epicos)
   - [Evidencias Visuais do Board no FigJam](#evidencias-visuais-do-board-no-figjam)
+  - [Evidencias Visuais da Interface (Front-end e UX)](#evidencias-visuais-da-interface-front-end-e-ux)
+  - [Evidencias Visuais e Logs de Ferramentas de Desenvolvedor (DevTools e Tool Calling)](#evidencias-visuais-e-logs-de-ferramentas-de-desenvolvedor-devtools-e-tool-calling)
 - [Atribuicoes e Backlog](#atribuicoes-e-backlog)
   - [Commits por Contribuidor](#commits-por-contribuidor)
   - [Tarefas Concluidas do Backlog](#tarefas-concluidas-do-backlog)
@@ -298,63 +300,130 @@ export interface ErroTool {
 
 ### Pre-requisitos
 
-| Dependencia      | Versao minima | Link                                          |
-| ---------------- | ------------- | --------------------------------------------- |
-| Node.js          | `20.14.0+`    | https://nodejs.org                            |
-| npm              | `10.0.0+`     | https://www.npmjs.com                         |
-| Chave Gemini API | N/A           | https://ai.google.dev/gemini-api/docs/api-key |
+| Dependencia | Versao Minima | Finalidade |
+| :--- | :--- | :--- |
+| **Node.js** | `20.14.0+` | Runtime para execucao dos modulos locais |
+| **npm** | `10.0.0+` | Gerenciador de pacotes e scripts |
+| **Docker e Docker Compose** | `24.0+` (opcional) | Execucao conteinerizada completa |
+| **Chave Gemini API** | Valida | Acesso ao modelo Google Gemini (Google AI Studio) |
+
+---
 
 ### Variaveis de Ambiente
 
-Cada módulo possui seu arquivo de exemplo correspondente:
+Antes de executar, configure os arquivos de ambiente correspondentes:
 
-- `auth/.env.example`
-- `tickets-tools/.env.example`
-- `gemini-chat/.env.local.example`
-
-Exemplo de configuração para `gemini-chat/.env.local`:
+#### 1. Para Execucao com Docker Compose (Arquivo `.env` na raiz)
+Crie o arquivo `.env` na raiz do repositorio:
 
 ```env
 GEMINI_API_KEY=sua_chave_do_google_ai_studio
 GEMINI_MODEL=gemini-3.5-flash-lite
-NEXT_PUBLIC_AUTH_URL=http://localhost:4000
+JWT_SECRET=super-secret-key-123456
 ```
 
-> **Aviso de Segurança:** A chave `GEMINI_API_KEY` deve ser configurada estritamente no backend. Nunca exponha credenciais no frontend ou em commits públicos.
+#### 2. Para Execucao Local (Arquivos por modulo)
+* Em `auth/.env`:
+  ```env
+  PORT=4000
+  JWT_SECRET=super-secret-key-123456
+  ```
+* Em `gemini-chat/.env.local`:
+  ```env
+  GEMINI_API_KEY=sua_chave_do_google_ai_studio
+  GEMINI_MODEL=gemini-3.5-flash-lite
+  NEXT_PUBLIC_AUTH_URL=http://localhost:4000
+  AUTH_SERVICE_URL=http://localhost:4000
+  ```
 
-### Inicializacao dos bancos e seeds
+> **Aviso de Seguranca:** A chave `GEMINI_API_KEY` deve ser configurada estritamente no backend. Nunca exponha credenciais no frontend ou em commits publicos.
 
-Execute os seeds para criar as tabelas e popular os dados iniciais do SQLite:
+---
+
+### Opcao 1: Execucao Local (Sem Docker)
+
+Guia passo a passo para executar os servicos diretamente no ambiente de desenvolvimento:
+
+#### Passo 1: Preparar Dependencias, Bancos e MCP (Build)
+Abra o terminal na raiz do projeto e execute a preparacao dos tres modulos:
 
 ```bash
-# 1. Banco de autenticacao e usuarios
+# 1. Instala dependencias e popula o banco de usuarios e limites
 cd auth
 npm install
 npm run db:seed
 
-# 2. Banco de eventos e ingressos
+# 2. Instala dependencias, popula eventos e compila o servidor MCP
 cd ../tickets-tools
 npm install
 npm run db:seed
 npm run build
+
+# 3. Instala dependencias do frontend e agente
+cd ../gemini-chat
+npm install
 ```
 
-### Executando Localmente
-
-Em três terminais separados:
+#### Passo 2: Iniciar o Microsservico de Autenticacao (`auth`)
+Em um **primeiro terminal**:
 
 ```bash
-# Terminal 1: Servico de Autenticacao (porta 4000)
 cd auth
 npm run dev
+```
+* O servico de autenticacao iniciara na porta **4000** (`http://localhost:4000`).
 
-# Terminal 2: Servidor de Tools MCP (transporte stdio e testes)
-cd tickets-tools
-npm run dev
+#### Passo 3: Iniciar o Frontend Conversacional (`gemini-chat`)
+Em um **segundo terminal**:
 
-# Terminal 3: Frontend e Agente Conversacional (porta 3000)
+```bash
 cd gemini-chat
 npm run dev
+```
+* O frontend Next.js iniciara na porta **3000** (`http://localhost:3000`).
+* O `gemini-chat` inicializa automaticamente o servidor MCP `tickets-tools` em segundo plano via processo Stdio.
+
+#### Passo 4: Acessar a Aplicacao no Navegador
+Acesse **`http://localhost:3000`** e faca login com qualquer um dos usuarios de teste (senha padrao: `123456`):
+* **`pedro`** (Limite: R$ 500,00)
+* **`luis`** (Limite: R$ 300,00)
+* **`everson`** (Limite: R$ 50,00)
+* **`carlos`** (Limite: R$ 5.000,00)
+* **`fernanda`** (Limite: R$ 0,00)
+
+---
+
+### Opcao 2: Execucao com Docker Compose
+
+Guia passo a passo para subir toda a arquitetura conteinerizada em um unico comando:
+
+#### Passo 1: Configurar o Arquivo `.env` na Raiz
+Certifique-se de que o arquivo `.env` na raiz contem sua chave da API do Gemini:
+
+```env
+GEMINI_API_KEY=sua_chave_do_google_ai_studio
+GEMINI_MODEL=gemini-3.5-flash-lite
+JWT_SECRET=super-secret-key-123456
+```
+
+#### Passo 2: Construir e Iniciar os Containers
+Na raiz do repositorio, execute:
+
+```bash
+docker compose up --build
+```
+* O container `auth` iniciara o servico de autenticacao na porta `4000`.
+* O container `app` construira o `tickets-tools`, o `gemini-chat` e disponibilizara o chat na porta `3000`.
+* Um volume persistente (`ingressos_db`) sera criado para preservar o banco SQLite.
+
+#### Passo 3: Acessar a Aplicacao
+Abra **`http://localhost:3000`** no navegador e realize o login com os usuarios de teste.
+
+#### Passo 4: Encerrar os Containers
+Para interromper e descer os servicos:
+
+```bash
+docker compose down
 ```
 
 ---
@@ -450,6 +519,57 @@ Abaixo estão os registros visuais do processo de planejamento e acompanhamento 
 
 #### D. Quadro de Histórico de Decisões Arquiteturais
 ![Histórico de Decisões no Board](./docs/screenshots/figjam-decisions-board-1.png)
+
+### Evidencias Visuais da Interface (Front-end e UX)
+
+Para detalhamento normativo do vocabulário, personas e comportamento de tela, consulte [`docs/design/vocabulario.md`](./docs/design/vocabulario.md). Abaixo estão as capturas de tela dos componentes em funcionamento:
+
+#### A. Tela de Autenticação e Cadastro (`LoginForm`)
+<!-- Capturas da tela de login e criação de conta -->
+![Tela de Autenticação 1](./docs/screenshots/interface-login-form-1.png)
+![Tela de Autenticação 2](./docs/screenshots/interface-login-form-2.png)
+
+#### B. Tela de Carregamento
+<!-- Captura do estado de carregamento inicial -->
+![Tela de Carregamento](./docs/screenshots/loading-screen.png)
+
+#### C. Interface Principal do Chat e Saldo em Tempo Real
+<!-- Capturas do diálogo conversacional e saldo restante -->
+![Interface do Chat Principal 1](./docs/screenshots/talking1.png)
+![Interface do Chat Principal 2](./docs/screenshots/talking2.png)
+
+#### D. Confirmação de Pagamento e Atualização de Saldo
+<!-- Captura de compra aprovada com atualização de limite -->
+![Pagamento Aprovado](./docs/screenshots/madeit.png)
+
+#### E. Bloqueio Amigável por Saldo Insuficiente
+<!-- Capturas do tratamento de saldo excedido e alternativas -->
+![Saldo Insuficiente 1](./docs/screenshots/dontmadeit.png)
+![Saldo Insuficiente 2](./docs/screenshots/dontmadeit2.png)
+
+### Evidencias Visuais e Logs de Ferramentas de Desenvolvedor (DevTools e Tool Calling)
+
+Demonstração do fluxo operacional das chamadas de ferramentas, requisições de rede, injeção de parâmetros de sessão e trilhas de auditoria capturadas nas ferramentas de desenvolvedor e terminais do backend:
+
+#### A. Fluxo de Autenticação e Emissão de Token JWT (`POST /login`)
+<!-- Captura do DevTools inspecionando o payload de login e retorno do Bearer Token -->
+![DevTools Network Login](./docs/screenshots/devtools-network-login.png)
+
+#### B. Invocação de Ferramenta de Consulta de Catálogo (`listar_catalogo`)
+<!-- Captura do log de requisição do modelo disparando a tool listar_catalogo no MCP -->
+![DevTools ToolCall Catalogo](./docs/screenshots/devtools-toolcall-catalog.png)
+
+#### C. Registro de Intenção e Injeção de Sessão (`registrar_intencao`)
+<!-- Captura do DevTools exibindo a interceptação do route.ts e injeção de usuario_id -->
+![DevTools ToolCall Reserva](./docs/screenshots/devtools-toolcall-reserva.png)
+
+#### D. Execução de Compra e Débito Atômico (`realizar_compra` e `PATCH /me/limite`)
+<!-- Captura da chamada de pagamento com verificação de limites e confirmação de estoque -->
+![DevTools ToolCall Compra](./docs/screenshots/devtools-toolcall-compra.png)
+
+#### E. Trilhas de Auditoria Estruturada no Backend (`audit.ts`)
+<!-- Captura dos logs de auditoria estruturada gerados em tickets-tools -->
+![Logs de Auditoria no Terminal](./docs/screenshots/terminal-audit-logs.png)
 
 ---
 
