@@ -86,3 +86,32 @@ Todas as mensagens geradas pelo sistema seguem estrutura objetiva com título, m
 ## 5. Onde o Detalhe Técnico Vive
 
 Identificadores de pedidos, códigos HTTP e logs de auditoria (`audit.ts`) são processados exclusivamente no backend. A interface do usuário e o diálogo com o agente preservam uma linguagem clara, acessível e segura.
+
+---
+
+## 6. Evidências Visuais e Prints da Interface (Front-end)
+
+Abaixo estão os locais reservados para inclusão das capturas de tela demonstrando a interface em funcionamento:
+
+### A. Tela de Autenticação e Cadastro (`LoginForm`)
+<!-- Adicione aqui o print da tela de login e escolha de usuário -->
+![Tela de Autenticação 1](../screenshots/interface-login-form-1.png)
+![Tela de Autenticação 2](../screenshots/interface-login-form-2.png)
+
+### B. Tela de Carregamento
+<!-- Adicione aqui o print da tela de carregamento -->
+![Tela de Carregamento](../screenshots/loading-screen.png)
+
+### C. Interface Principal do Chat e Saldo em Tempo Real
+<!-- Adicione aqui o print da conversa com saldo no painel lateral esquerdo -->
+![Interface do Chat Principal](../screenshots/talking1.png)
+![Interface do Chat Principal 2](../screenshots/talking2.png)
+
+### D. Confirmação de Pagamento e Atualização de Saldo
+<!-- Adicione aqui o print da confirmação de compra com botão Ver meu ingresso -->
+![Pagamento Aprovado](../screenshots/madeit.png)
+
+### E. Bloqueio Amigável por Saldo Insuficiente
+<!-- Adicione aqui o print do aviso de saldo ultrapassado com opções mais baratas -->
+![Saldo Insuficiente](../screenshots/dontmadeit.png)
+![Saldo Insuficiente 2](../screenshots/dontmadeit2.png)
