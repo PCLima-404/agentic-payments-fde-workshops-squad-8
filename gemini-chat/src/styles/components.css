@@ -1,0 +1,800 @@
+/* =====================================================================
+   COMPONENTS.CSS  ·  Componentes da interface do comprador
+   Depende de tokens.css. Importe tokens.css antes deste arquivo.
+   ---------------------------------------------------------------------
+   Cada bloco abaixo traz: o que é, onde aparece e a regra que não pode
+   ser quebrada. A marcação de referência de cada um está em
+   components.html, com o mesmo nome de classe.
+   Nomenclatura: prefixo "ig-" (ingressos), palavras em português,
+   modificadores com "--".
+   ===================================================================== */
+
+/* --- RESET MÍNIMO ---------------------------------------------------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  background: var(--c-papel);
+  color: var(--c-tinta);
+  font: var(--t-corpo);
+  -webkit-font-smoothing: antialiased;
+}
+a {
+  color: var(--c-acao);
+  text-decoration: none;
+}
+a:hover {
+  color: var(--c-tinta);
+  text-decoration: underline;
+}
+button,
+input,
+textarea {
+  font: inherit;
+  border-radius: 0;
+}
+
+/* =====================================================================
+   1. LAYOUT DA APLICAÇÃO
+   Tela de conversa (wireframe 2d): três colunas fixas em desktop.
+   Abaixo de 1040px a coluna de conversas colapsa em menu e o painel de
+   pedido vira bloco fixo no rodapé. Nunca empilhe as três colunas.
+   ===================================================================== */
+.ig-app {
+  display: grid;
+  grid-template-columns: var(--col-lateral) 1fr var(--col-pedido);
+  height: 100vh;
+  background: var(--c-papel);
+}
+.ig-app__lateral {
+  border-right: var(--borda);
+  background: var(--c-superficie);
+  display: flex;
+  flex-direction: column;
+}
+.ig-app__conversa {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.ig-app__pedido {
+  border-left: var(--borda);
+  background: var(--c-superficie);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Cabeçalho de qualquer coluna. Altura vem do conteúdo, não fixe. */
+.ig-cabecalho {
+  border-bottom: var(--borda);
+  background: var(--c-superficie);
+  padding: var(--e-3) var(--e-6);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e-4);
+}
+.ig-cabecalho__titulo {
+  font: var(--t-t4);
+}
+.ig-cabecalho__estado {
+  font: var(--t-apoio);
+  color: var(--c-aprovado);
+  margin-top: 2px;
+}
+
+/* =====================================================================
+   2. BOTÕES
+   Uma única ação azul por tela. Tudo que não é a ação principal usa
+   contorno. Texto sempre em frase curta e no imperativo.
+   ===================================================================== */
+.ig-botao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--alt-botao);
+  padding: 0 var(--e-5);
+  font: var(--t-acao);
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-radius: 0; /* trava */
+}
+.ig-botao--principal {
+  background: var(--c-acao);
+  color: #fff;
+}
+.ig-botao--principal:hover {
+  background: #2343bc;
+}
+.ig-botao--contorno {
+  border: var(--borda);
+  color: var(--c-tinta);
+  background: var(--c-superficie);
+}
+.ig-botao--contorno:hover {
+  background: var(--c-neutro-claro);
+}
+.ig-botao--tinta {
+  background: var(--c-tinta);
+  color: #fff;
+}
+.ig-botao--bloco {
+  width: 100%;
+}
+.ig-botao--compacto {
+  height: var(--alvo-min);
+  padding: 0 var(--e-4);
+  font: var(--t-rotulo);
+}
+.ig-botao:disabled {
+  background: var(--c-linha);
+  color: var(--c-tinta-25);
+  cursor: not-allowed;
+}
+.ig-botao:focus-visible {
+  outline: 2px solid var(--c-tinta);
+  outline-offset: 2px;
+}
+
+/* Chip de atalho de conversa. É sugestão de fala, escrita como o
+   usuário fala ("tem mais barato?"). Não use para navegação. */
+.ig-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--alvo-min);
+  padding: var(--e-2) var(--e-3);
+  border: var(--borda);
+  background: var(--c-superficie);
+  font: var(--t-rotulo);
+  color: var(--c-tinta);
+  cursor: pointer;
+}
+.ig-chip:hover {
+  background: var(--c-acao-claro);
+  border-color: var(--c-acao);
+}
+
+/* =====================================================================
+   3. FORMULÁRIO (tela de entrar, wireframe 2b)
+   Coluna de no máximo 420px. Rótulo sempre visível acima do campo,
+   nunca só placeholder.
+   ===================================================================== */
+.ig-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-5);
+  max-width: 420px;
+}
+.ig-campo__rotulo {
+  display: flex;
+  justify-content: space-between;
+  font: var(--t-rotulo);
+}
+.ig-campo__acao {
+  color: var(--c-acao);
+  cursor: pointer;
+}
+.ig-campo__entrada {
+  width: 100%;
+  height: var(--alt-campo);
+  margin-top: var(--e-2);
+  border: var(--borda);
+  background: var(--c-superficie);
+  padding: 0 var(--e-3);
+  font: 400 15px/1.2 var(--fonte);
+  color: var(--c-tinta);
+}
+.ig-campo__entrada::placeholder {
+  color: var(--c-tinta-25);
+}
+.ig-campo__entrada:focus {
+  outline: 2px solid var(--c-acao);
+  outline-offset: -2px;
+}
+/* Erro de campo: linha curta abaixo do campo, nunca tela cheia. */
+.ig-campo__erro {
+  margin-top: var(--e-2);
+  font: var(--t-apoio);
+  color: var(--c-bloqueio);
+}
+
+/* Painel de marca do login: bloco cheio na cor de ação, 46% da largura.
+   É a única superfície azul dessa tela. */
+.ig-marca-painel {
+  background: var(--c-acao);
+  color: #fff;
+  padding: var(--e-8);
+  display: flex;
+  flex-direction: column;
+}
+.ig-marca-painel__chamada {
+  font: var(--t-display);
+  letter-spacing: var(--track-titulo);
+  text-wrap: pretty;
+  margin-top: auto;
+}
+
+/* =====================================================================
+   4. CONVERSA
+   Fala do usuário: tinta cheia, alinhada à direita.
+   Fala do agente: contorno, alinhada à esquerda, largura máxima 78%
+   para não virar parede de texto.
+   ===================================================================== */
+.ig-mensagens {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--e-5) var(--e-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+}
+.ig-fala {
+  padding: var(--e-3);
+  font: var(--t-corpo);
+  max-width: 78%;
+}
+.ig-fala--usuario {
+  align-self: flex-end;
+  background: var(--c-tinta);
+  color: #fff;
+  max-width: 70%;
+}
+.ig-fala--agente {
+  background: var(--c-superficie);
+  border: var(--borda);
+  color: var(--c-tinta);
+}
+.ig-fala__markdown p {
+  margin: 0 0 var(--e-2) 0;
+}
+.ig-fala__markdown p:last-child {
+  margin-bottom: 0;
+}
+.ig-fala__markdown strong {
+  font-weight: 600;
+}
+.ig-fala__markdown ul,
+.ig-fala__markdown ol {
+  margin: 0 0 var(--e-2) 0;
+  padding-left: var(--e-4);
+}
+.ig-fala__markdown li {
+  margin-bottom: var(--e-1);
+}
+.ig-fala__markdown code {
+  font: 400 13px/1.4 var(--fonte-interna);
+  background: var(--c-neutro-claro);
+  padding: 1px 4px;
+}
+.ig-fala__markdown pre {
+  font: 400 13px/1.5 var(--fonte-interna);
+  background: var(--c-neutro-claro);
+  border: var(--borda-fraca);
+  padding: var(--e-3);
+  overflow-x: auto;
+  margin: 0 0 var(--e-2) 0;
+}
+.ig-fala__markdown pre code {
+  background: none;
+  padding: 0;
+}
+.ig-fala__markdown a {
+  color: var(--c-acao);
+}
+
+/* Barra de escrita. Chips em cima, campo e botão embaixo. */
+.ig-escrita {
+  border-top: var(--borda);
+  background: var(--c-superficie);
+  padding: var(--e-3) var(--e-6);
+}
+.ig-escrita__atalhos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-2);
+}
+.ig-escrita__linha {
+  display: flex;
+  gap: var(--e-2);
+  margin-top: var(--e-3);
+}
+.ig-escrita__entrada {
+  flex: 1;
+  height: var(--alt-campo);
+  border: var(--borda);
+  padding: 0 var(--e-3);
+  background: var(--c-superficie);
+}
+.ig-escrita__enviar {
+  width: 96px;
+  height: var(--alt-campo);
+}
+
+/* Agente pensando: três blocos, sem brilho e sem giro.
+   Substitui qualquer spinner. */
+.ig-pensando {
+  display: flex;
+  gap: var(--e-1);
+  padding: var(--e-3);
+  background: var(--c-superficie);
+  border: var(--borda);
+  width: fit-content;
+}
+.ig-pensando span {
+  width: 10px;
+  height: 10px;
+  background: var(--c-tinta-25);
+  animation: ig-pulso 1.2s steps(1) infinite;
+}
+.ig-pensando span:nth-child(2) {
+  animation-delay: 0.4s;
+}
+.ig-pensando span:nth-child(3) {
+  animation-delay: 0.8s;
+}
+@keyframes ig-pulso {
+  0%,
+  33% {
+    background: var(--c-acao);
+  }
+  34%,
+  100% {
+    background: var(--c-tinta-25);
+  }
+}
+
+/* =====================================================================
+   5. CARTÃO DE EVENTO
+   Faixa de categoria no topo substitui a imagem enquanto não houver
+   foto real. A cor da faixa é a categoria, não a estética.
+   Estado escolhido: faixa em azul cheio + etiqueta textual. Seleção
+   nunca depende só de borda (acessibilidade).
+   ===================================================================== */
+.ig-eventos {
+  display: flex;
+  gap: var(--e-3);
+}
+.ig-evento {
+  flex: 1;
+  border: var(--borda);
+  background: var(--c-superficie);
+  cursor: pointer;
+}
+.ig-evento__faixa {
+  height: 74px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: var(--e-2);
+  font: 500 11px/1 var(--fonte);
+}
+.ig-evento__faixa--show {
+  background: var(--c-atencao-claro);
+  color: var(--c-atencao-texto);
+}
+.ig-evento__faixa--teatro {
+  background: var(--c-aprovado-claro);
+  color: var(--c-aprovado-texto);
+}
+.ig-evento__faixa--festival {
+  background: var(--c-neutro-claro);
+  color: var(--c-tinta-70);
+}
+.ig-evento__faixa--esporte {
+  background: var(--c-bloqueio-claro);
+  color: var(--c-bloqueio);
+}
+.ig-evento__corpo {
+  padding: var(--e-3);
+}
+.ig-evento__nome {
+  font: 600 14px/1.3 var(--fonte);
+}
+.ig-evento__meta {
+  font: var(--t-apoio);
+  color: var(--c-tinta-45);
+  margin-top: var(--e-1);
+}
+.ig-evento__preco {
+  font: 600 15px/1.2 var(--fonte);
+  margin-top: var(--e-2);
+}
+.ig-evento--escolhido {
+  border-color: var(--c-acao);
+  background: var(--c-acao-claro);
+}
+.ig-evento--escolhido .ig-evento__faixa {
+  background: var(--c-acao);
+  color: #fff;
+}
+/* Sem estoque: sem cor de alerta, apenas rebaixado. */
+.ig-evento--esgotado {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* =====================================================================
+   6. PAINEL DO PEDIDO (coluna direita)
+   Mostra o que o usuário compra, não o que o sistema guardou:
+   evento, quantidade, total, prazo e forma de pagamento.
+   Proibido exibir identificador de pedido ou data técnica.
+   ===================================================================== */
+.ig-pedido {
+  padding: var(--e-5);
+}
+.ig-pedido__capa {
+  height: 110px;
+  background: var(--c-acao);
+} /* trocar por foto do evento quando existir */
+.ig-pedido__nome {
+  font: var(--t-t4);
+  margin-top: var(--e-3);
+}
+.ig-pedido__meta {
+  font: var(--t-rotulo);
+  font-weight: 400;
+  color: var(--c-tinta-45);
+  margin-top: var(--e-1);
+}
+.ig-pedido__linha {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--e-4);
+  border-top: 1px solid var(--c-linha-fraca);
+  padding-top: var(--e-3);
+}
+.ig-pedido__total {
+  font: var(--t-total);
+}
+.ig-pedido__prazo {
+  background: var(--c-neutro-claro);
+  padding: var(--e-3);
+  margin-top: var(--e-3);
+  font: var(--t-apoio);
+  color: var(--c-tinta-70);
+}
+.ig-pedido__pagamento {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+  margin-top: var(--e-5);
+}
+
+/* Contador de quantidade. Blocos quadrados de 34px lado a lado,
+   sem espaço entre eles. */
+.ig-contador {
+  display: flex;
+  align-items: center;
+}
+.ig-contador__botao {
+  width: 34px;
+  height: 34px;
+  border: var(--borda);
+  background: var(--c-superficie);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 600 15px/1 var(--fonte);
+  cursor: pointer;
+}
+.ig-contador__valor {
+  width: 40px;
+  text-align: center;
+  font: 600 15px/1 var(--fonte);
+}
+
+/* =====================================================================
+   7. RESULTADO DE PAGAMENTO
+   Duas variações com a MESMA anatomia: faixa de título em cor cheia,
+   frase em linguagem comum, números lado a lado, ações.
+   Só o título, a frase e a cor mudam. Serve para aprovado, valor
+   insuficiente, pedido vencido, pedido já pago e forma não aceita.
+   NUNCA imprima código de erro aqui. Ele vai para o log.
+   ===================================================================== */
+.ig-resultado {
+  border: 1px solid;
+}
+.ig-resultado__faixa {
+  padding: var(--e-3) var(--e-4);
+  font: var(--t-acao);
+  color: #fff;
+}
+.ig-resultado__corpo {
+  padding: var(--e-4);
+}
+.ig-resultado__frase {
+  font: var(--t-corpo);
+}
+.ig-resultado__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-2);
+  margin-top: var(--e-4);
+}
+.ig-resultado--aprovado {
+  border-color: var(--c-aprovado);
+  background: var(--c-aprovado-claro);
+}
+.ig-resultado--aprovado .ig-resultado__faixa {
+  background: var(--c-aprovado);
+}
+.ig-resultado--bloqueio {
+  border-color: var(--c-bloqueio);
+  background: var(--c-bloqueio-claro);
+}
+.ig-resultado--bloqueio .ig-resultado__faixa {
+  background: var(--c-bloqueio);
+}
+
+/* Números lado a lado. Dois ou três no máximo, cada um com rótulo em
+   palavra do usuário ("ainda pode gastar"). */
+.ig-numeros {
+  display: flex;
+  border: 1px solid var(--c-borda-aprovado);
+  background: var(--c-superficie);
+  margin-top: var(--e-4);
+}
+.ig-resultado--bloqueio .ig-numeros {
+  border-color: var(--c-borda-bloqueio);
+}
+.ig-numeros__item {
+  flex: 1;
+  padding: var(--e-3);
+}
+.ig-numeros__item + .ig-numeros__item {
+  border-left: 1px solid var(--c-borda-aprovado);
+}
+.ig-resultado--bloqueio .ig-numeros__item + .ig-numeros__item {
+  border-left-color: var(--c-borda-bloqueio);
+}
+.ig-numeros__rotulo {
+  font: var(--t-apoio);
+  color: var(--c-tinta-45);
+}
+.ig-numeros__valor {
+  font: 600 15px/1.2 var(--fonte);
+  margin-top: 3px;
+}
+.ig-numeros__valor--positivo {
+  color: var(--c-aprovado);
+}
+.ig-numeros__valor--negativo {
+  color: var(--c-bloqueio);
+}
+
+/* =====================================================================
+   8. VALOR DISPONÍVEL (bloco de saldo, rodapé da lateral)
+   É informação de dinheiro, por isso amarelo e não azul. Sempre com
+   barra de consumo. Nunca escreva "limite de gasto".
+   ===================================================================== */
+.ig-saldo {
+  margin-top: auto;
+  border-top: var(--borda);
+  background: var(--c-atencao-claro);
+  padding: var(--e-5);
+}
+.ig-saldo__rotulo {
+  font: var(--t-rotulo);
+  color: var(--c-atencao-texto);
+}
+.ig-saldo__valor {
+  font: var(--t-valor);
+  margin-top: var(--e-1);
+}
+.ig-saldo__nota {
+  font: var(--t-apoio);
+  color: var(--c-atencao-texto);
+  margin-top: var(--e-2);
+}
+.ig-barra {
+  height: 8px;
+  background: #eadfc2;
+  margin-top: var(--e-3);
+}
+.ig-barra__preenchido {
+  height: 8px;
+  background: var(--c-atencao);
+} /* largura via style inline ou variável */
+.ig-barra--acao {
+  background: var(--c-linha);
+}
+.ig-barra--acao .ig-barra__preenchido {
+  background: var(--c-acao);
+}
+
+/* =====================================================================
+   9. LISTA DE CONVERSAS (lateral)
+   Item ativo: fundo claro de seleção + faixa azul de 3px à esquerda.
+   ===================================================================== */
+.ig-conversas__titulo {
+  padding: var(--e-4) var(--e-5) var(--e-2);
+  font: var(--t-rotulo);
+  color: var(--c-tinta-45);
+}
+.ig-conversa-item {
+  padding: var(--e-3) var(--e-5);
+  font: var(--t-corpo);
+  color: var(--c-tinta-70);
+  cursor: pointer;
+  border-left: var(--enfase) solid transparent;
+}
+.ig-conversa-item:hover {
+  background: var(--c-neutro-claro);
+}
+.ig-conversa-item--ativo {
+  background: var(--c-acao-claro);
+  color: var(--c-tinta);
+  font-weight: 500;
+  border-left-color: var(--c-acao);
+}
+
+/* =====================================================================
+   10. CARREGAMENTO (wireframe 2c)
+   Progresso determinado, etapas nomeadas por benefício.
+   Proibido: spinner infinito, nome de serviço, nome de protocolo.
+   Etapa em andamento é a única com fundo colorido.
+   ===================================================================== */
+.ig-carregando {
+  max-width: 620px;
+}
+.ig-carregando__blocos {
+  display: flex;
+  gap: var(--e-2);
+}
+.ig-carregando__bloco {
+  width: 64px;
+  height: 34px;
+  background: var(--c-linha);
+}
+.ig-carregando__bloco--feito {
+  background: var(--c-acao);
+}
+.ig-carregando__bloco--agora {
+  background: #c6cff2;
+}
+.ig-etapas {
+  border: var(--borda);
+  background: var(--c-superficie);
+  margin-top: var(--e-7);
+}
+.ig-etapa {
+  display: flex;
+  align-items: center;
+  gap: var(--e-3);
+  padding: var(--e-4);
+  border-bottom: 1px solid var(--c-linha-fraca);
+}
+.ig-etapa:last-child {
+  border-bottom: none;
+}
+.ig-etapa__marca {
+  width: 16px;
+  height: 16px;
+  background: var(--c-linha);
+  flex: none;
+}
+.ig-etapa__nome {
+  flex: 1;
+  font: 500 15px/1.3 var(--fonte);
+}
+.ig-etapa__estado {
+  font: var(--t-rotulo);
+  color: var(--c-tinta-45);
+}
+.ig-etapa--feita .ig-etapa__marca {
+  background: var(--c-aprovado);
+}
+.ig-etapa--feita .ig-etapa__estado {
+  color: var(--c-aprovado);
+}
+.ig-etapa--agora {
+  background: var(--c-atencao-claro);
+}
+.ig-etapa--agora .ig-etapa__marca {
+  background: var(--c-atencao);
+}
+.ig-etapa--agora .ig-etapa__estado {
+  color: var(--c-atencao-texto);
+}
+.ig-etapa--espera .ig-etapa__marca {
+  background: none;
+  border: 1px solid var(--c-tinta-25);
+}
+.ig-etapa--espera .ig-etapa__nome,
+.ig-etapa--espera .ig-etapa__estado {
+  color: var(--c-tinta-25);
+}
+
+/* =====================================================================
+   11. TELA DE FALHA DE SISTEMA (wireframe 2e)
+   Só existe quando a conversa não pode existir. Recusa de pagamento
+   nunca usa esta tela.
+   Bloco vermelho à esquerda com a frase curta, explicação e duas
+   saídas à direita. Detalhe técnico não aparece.
+   ===================================================================== */
+.ig-falha {
+  display: flex;
+  min-height: 520px;
+  background: var(--c-superficie);
+}
+.ig-falha__bloco {
+  width: 38%;
+  background: var(--c-bloqueio);
+  color: #fff;
+  padding: var(--e-8);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+.ig-falha__titulo {
+  font: var(--t-t1);
+  letter-spacing: var(--track-titulo);
+  margin-top: var(--e-5);
+}
+.ig-falha__lado {
+  flex: 1;
+  padding: var(--e-8) 56px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.ig-falha__texto {
+  font: 400 17px/1.6 var(--fonte);
+  max-width: var(--largura-texto);
+}
+.ig-falha__acoes {
+  display: flex;
+  gap: var(--e-3);
+  margin-top: var(--e-7);
+}
+.ig-falha__acoes .ig-botao {
+  height: 56px;
+  padding: 0 var(--e-6);
+}
+.ig-falha__nota {
+  margin-top: var(--e-7);
+  border-top: 1px solid var(--c-linha-fraca);
+  padding-top: var(--e-4);
+  font: var(--t-rotulo);
+  font-weight: 400;
+  color: var(--c-tinta-45);
+}
+
+/* =====================================================================
+   12. AVISO NEUTRO
+   Informação de apoio dentro de qualquer área. Faixa azul de ênfase à
+   esquerda, fundo neutro. Não é alerta, então não usa vermelho.
+   ===================================================================== */
+.ig-aviso {
+  background: var(--c-neutro-claro);
+  border-left: var(--enfase) solid var(--c-acao);
+  padding: var(--e-3);
+  font: var(--t-rotulo);
+  font-weight: 400;
+  color: var(--c-tinta-70);
+}
+
+/* =====================================================================
+   13. UTILITÁRIOS
+   ===================================================================== */
+.ig-quadro-marca {
+  width: 26px;
+  height: 26px;
+  background: var(--c-tinta);
+} /* placeholder do logo */
+.ig-divisor {
+  height: 1px;
+  background: var(--c-linha);
+}
+.ig-oculto-visual {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
