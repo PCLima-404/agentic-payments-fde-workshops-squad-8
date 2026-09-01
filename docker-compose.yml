@@ -7,6 +7,7 @@ services:
     environment:
       PORT: 4000
       JWT_SECRET: ${JWT_SECRET}
+    command: sh -c "node dist/db/seed.js && node dist/server.js"
     restart: unless-stopped
 
   app:
@@ -28,6 +29,7 @@ services:
       - ingressos_db:/app/data
     depends_on:
       - auth
+    command: sh -c "node tickets-tools/dist/src/db/seed.js && node server.js"
     restart: unless-stopped
 
 volumes:
