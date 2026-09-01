@@ -1,3 +1,5 @@
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import type { MensagemUI } from "../types";
 
 export default function MessageBubble({ mensagem }: { mensagem: MensagemUI }) {
@@ -6,7 +8,15 @@ export default function MessageBubble({ mensagem }: { mensagem: MensagemUI }) {
     <div
       className={`ig-fala ${ehUsuario ? "ig-fala--usuario" : "ig-fala--agente"}`}
     >
-      {mensagem.texto}
+      {ehUsuario ? (
+        mensagem.texto
+      ) : (
+        <div className="ig-fala__markdown">
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            {mensagem.texto}
+          </ReactMarkdown>
+        </div>
+      )}
     </div>
   );
 }
