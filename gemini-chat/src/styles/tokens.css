@@ -1,0 +1,88 @@
+/* =====================================================================
+   TOKENS.CSS  ·  Fundação visual do produto de ingressos
+   Base: wireframes desktop 2b a 2f (arquivo "Fluxo Wireframes.dc.html")
+   ---------------------------------------------------------------------
+   REGRAS NÃO NEGOCIÁVEIS DO DESIGN
+   1. border-radius sempre 0. Nenhum canto arredondado.
+   2. Nenhum gradiente (linear, radial, conic) em nenhuma superfície.
+   3. Nenhum box-shadow e nenhum efeito de brilho. Profundidade vem de
+      borda 1px e de área de cor.
+   4. Cada cor tem um significado fixo. Cor não decora.
+   5. Fonte única na interface do comprador: Space Grotesk.
+      IBM Plex Mono só em telas internas (log, admin).
+   ===================================================================== */
+
+:root {
+  /* ---- Cores essenciais -------------------------------------------- */
+  --c-acao: #2a4fd8; /* botão principal, item escolhido, marca      */
+  --c-aprovado: #157a47; /* pagamento confirmado, etapa concluída       */
+  --c-bloqueio: #c7402b; /* recusa de pagamento, falha de sistema       */
+  --c-atencao: #c98a00; /* dinheiro disponível, etapa em andamento     */
+  --c-tinta: #121214; /* texto, bordas, fala do usuário              */
+  --c-tinta-70: #4a4a50; /* texto de apoio                              */
+  --c-tinta-45: #6b6b70; /* rótulo, metadado                            */
+  --c-tinta-25: #b4b2ab; /* placeholder, item desabilitado              */
+  --c-papel: #f7f6f2; /* fundo da aplicação                          */
+  --c-superficie: #ffffff; /* cartão, painel, cabeçalho                   */
+  --c-linha: #d6d4cd; /* divisor forte                               */
+  --c-linha-fraca: #e6e3da; /* divisor interno de cartão                   */
+
+  /* ---- Tons claros de apoio ---------------------------------------
+     Uso: fundo de área e faixa de categoria. Nunca em texto.          */
+  --c-acao-claro: #edf0fc; /* seleção                               */
+  --c-aprovado-claro: #e3f0e8; /* categoria teatro, sucesso             */
+  --c-atencao-claro: #fbf0d8; /* categoria show, bloco de saldo        */
+  --c-bloqueio-claro: #fbe7e2; /* categoria esporte, recusa             */
+  --c-neutro-claro: #f1ede4; /* categoria festival, aviso neutro      */
+  /* Texto legível sobre os tons claros: */
+  --c-atencao-texto: #8a6400;
+  --c-aprovado-texto: #0f5e37;
+  --c-borda-aprovado: #c3ddce;
+  --c-borda-bloqueio: #efc7be;
+
+  /* ---- Tipografia --------------------------------------------------
+     Space Grotesk: https://fonts.google.com/specimen/Space+Grotesk
+     IBM Plex Mono: https://fonts.google.com/specimen/IBM+Plex+Mono
+     Ambas com licença SIL Open Font, uso comercial liberado.          */
+  --fonte: "Space Grotesk", Helvetica, Arial, sans-serif;
+  --fonte-interna: "IBM Plex Mono", ui-monospace, monospace;
+
+  --t-display: 600 52px/1.05 var(--fonte); /* chamada de tela cheia     */
+  --t-t1: 600 40px/1.1 var(--fonte); /* título de tela de erro    */
+  --t-t2: 600 36px/1.15 var(--fonte); /* título de carregamento    */
+  --t-t3: 600 32px/1.15 var(--fonte); /* título de formulário      */
+  --t-valor: 600 26px/1.2 var(--fonte); /* valor disponível          */
+  --t-total: 600 20px/1.2 var(--fonte); /* total do pedido           */
+  --t-t4: 600 16px/1.3 var(--fonte); /* título de painel e cartão */
+  --t-acao: 600 15px/1.2 var(--fonte); /* botão, faixa de resultado */
+  --t-corpo: 400 14px/1.5 var(--fonte); /* mensagem do chat, corpo   */
+  --t-rotulo: 500 13px/1.4 var(--fonte); /* label de campo, chip      */
+  --t-apoio: 400 12px/1.5 var(--fonte); /* metadado, nota            */
+
+  /* Títulos grandes pedem letter-spacing negativo: */
+  --track-titulo: -0.02em;
+
+  /* ---- Espaço ------------------------------------------------------
+     Base 4px. Use apenas os degraus abaixo.                           */
+  --e-1: 4px;
+  --e-2: 8px;
+  --e-3: 12px;
+  --e-4: 16px;
+  --e-5: 20px;
+  --e-6: 24px;
+  --e-7: 32px;
+  --e-8: 44px;
+
+  /* ---- Forma e medida ---------------------------------------------- */
+  --raio: 0; /* trava proposital, não alterar       */
+  --borda: 1px solid var(--c-tinta);
+  --borda-fraca: 1px solid var(--c-linha);
+  --enfase: 3px; /* faixa lateral de ênfase             */
+  --alt-botao: 52px; /* 56px na tela de erro                */
+  --alt-campo: 52px;
+  --alvo-min: 44px; /* nunca menor que isso                */
+  --largura-app: 1200px; /* referência de desktop               */
+  --col-lateral: 230px; /* conversas e saldo                   */
+  --col-pedido: 300px; /* resumo do pedido                    */
+  --largura-texto: 520px; /* leitura confortável                 */
+}

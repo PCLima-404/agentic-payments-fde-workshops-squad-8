@@ -11,9 +11,15 @@
 //   4. Intenção dentro do prazo (INTENCAO_EXPIRADA)
 //   5. Valor total dentro do limite do usuário (LIMITE_EXCEDIDO)
 
-import { intencoes } from "../data/intencoes";
+import {
+  confirmarPagamentoIntencao,
+  buscarIntencaoPorId,
+} from "../data/intencoes";
 import { transacoes } from "../data/transacoes";
-import { obterLimiteUsuario } from "../data/limites";
+import {
+  debitarLimiteUsuario,
+  obterLimiteUsuario,
+} from "../data/limites";
 import { gerarId } from "../utils/ids";
 import { registrarChamada } from "../logs/audit";
 import { criarErro, ErroTool } from "../types/errors";
@@ -72,8 +78,8 @@ export async function realizarCompra(
     return criarErro("METODO_INVALIDO");
   }
 
-  // 2. Busca a intenção no Map em memória
-  const intencao = intencoes.get(intencao_id);
+  // 2. Busca a intenção no banco de dados
+  const intencao = buscarIntencaoPorId(intencao_id);
 
   // 3. Valida posse: intenção deve existir e pertencer ao usuário autenticado
   const erroPosse = validarPosse(intencao, usuario_id);
@@ -144,11 +150,33 @@ export async function realizarCompra(
     return criarErro("LIMITE_EXCEDIDO");
   }
 
-  // 8. Todas as validações passaram — processa a compra
+  let limiteRestante: number;
+  try {
+    limiteRestante = await debitarLimiteUsuario(token, intencaoValida.valorTotal);
+  } catch (erro) {
+    registrarChamada({
+      tool: "realizar_compra",
+      usuarioId: usuario_id,
+      resultado: "recusado",
+      detalhe: "ERRO_INTERNO — falha ao debitar limite no auth/",
+      timestamp: new Date().toISOString(),
+    });
+    return criarErro("ERRO_INTERNO");
+  }
 
-  // Marca a intenção como paga no Map (garante idempotência: não pode ser usada novamente)
-  intencaoValida.status = "paga";
-  intencoes.set(intencao_id, intencaoValida);
+  // 8. Todas as validações passaram — processa a compra
+  // Atualiza a intenção para 'paga' garantindo que ainda está 'pendente'
+  const pagou = confirmarPagamentoIntencao(intencao_id);
+  if (!pagou) {
+    registrarChamada({
+      tool: "realizar_compra",
+      usuarioId: usuario_id,
+      resultado: "recusado",
+      detalhe: "INTENCAO_EXPIRADA — intenção expirada durante processamento",
+      timestamp: new Date().toISOString(),
+    });
+    return criarErro("INTENCAO_EXPIRADA");
+  }
 
   // Gera identificador único da transação
   const transacaoId = gerarId("tx");
@@ -163,9 +191,6 @@ export async function realizarCompra(
     data: dataCompra,
   };
   transacoes.set(transacaoId, transacao);
-
-  // Calcula o saldo restante após a compra
-  const limiteRestante = limite - intencaoValida.valorTotal;
 
   registrarChamada({
     tool: "realizar_compra",

@@ -13,11 +13,12 @@
 // Prazo de expiração: 5 minutos a partir do momento de registro (decisão de equipe).
 
 import { buscarEventoPorId, decrementarVagas } from "../data/eventos";
-import { intencoes } from "../data/intencoes";
+import { salvarIntencao, expirarIntencoesVencidas } from "../data/intencoes";
 import { gerarId } from "../utils/ids";
 import { registrarChamada } from "../logs/audit";
 import { criarErro, ErroTool } from "../types/errors";
 import { Intencao } from "../types";
+import { calcularValorTotal } from "../validators/calculo.validator";
 
 // Prazo de expiração da intenção em minutos (decisão de equipe: 5 minutos)
 const MINUTOS_EXPIRACAO = 5;
@@ -41,6 +42,9 @@ export function registrarIntencao(
   args: ArgsRegistrarIntencao
 ): Intencao | ErroTool {
   const { evento_id, quantidade, usuario_id } = args;
+
+  // Libera proativamente quaisquer intenções que já tenham vencido antes de avaliar o estoque
+  expirarIntencoesVencidas();
 
   // Busca o evento no banco SQLite (função entregue pelo PR do colega)
   const evento = buscarEventoPorId(evento_id);
@@ -83,8 +87,8 @@ export function registrarIntencao(
     return criarErro("VAGAS_INSUFICIENTES");
   }
 
-  // Calcula valor total no backend — cliente nunca envia valor
-  const valorTotal = evento.preco * quantidade;
+  // Calcula valor total no backend via regra de domínio — cliente nunca envia valor
+  const valorTotal = calcularValorTotal(evento.preco, quantidade);
 
   // Calcula o timestamp de expiração (agora + MINUTOS_EXPIRACAO)
   const expiraEm = new Date(
@@ -106,8 +110,8 @@ export function registrarIntencao(
     expiraEm,
   };
 
-  // Persiste a intenção no Map em memória
-  intencoes.set(intencaoId, intencao);
+  // Persiste a intenção no banco de dados
+  salvarIntencao(intencao);
 
   registrarChamada({
     tool: "registrar_intencao",

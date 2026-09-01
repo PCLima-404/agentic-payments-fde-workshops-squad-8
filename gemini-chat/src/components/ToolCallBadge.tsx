@@ -1,1 +1,9 @@
-// TODO (Pessoa 3): indicador visual de quando o agente chamou uma tool
+export default function ToolCallBadge() {
+  return (
+    <div className="ig-pensando" aria-label="Assistente digitando">
+      <span />
+      <span />
+      <span />
+    </div>
+  );
+}
