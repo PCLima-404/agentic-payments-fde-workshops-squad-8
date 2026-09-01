@@ -591,7 +591,7 @@ Demonstração do fluxo operacional das chamadas de ferramentas, requisições d
 | --------------------------------------| ---------|
 | Pedro Cesar P. Lima / PCLima         | 26      |
 | Éverson Filipe Campos da Silva Moura | 33      |
-| Luis Filipe Mendes Nogueira          | 15      |
+| Luis Filipe Mendes Nogueira          | 18      |
 
 <!-- PREENCHER: adicione os demais membros do squad conforme contribuirem via commits. -->
 
